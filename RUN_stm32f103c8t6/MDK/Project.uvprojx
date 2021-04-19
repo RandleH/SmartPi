@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_FULL_ASSERT</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\CMSIS\CM3\DeviceSupport\startup\arm;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\USER\inc;..\Libraries\CMSIS\CM3\DeviceSupport;..\Libraries\Device;..\BSP;..\..\core\BlackHouse;..\..\core\Font;..\..\core\STB;..\self;..\..\core;..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\freeRTOS\include;..\Libraries\freeRTOS\config;..\Libraries\freeRTOS\portable\RVDS\ARM_CM3</IncludePath>
+              <IncludePath>..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\CMSIS\CM3\DeviceSupport\startup\arm;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\USER\inc;..\Libraries\CMSIS\CM3\DeviceSupport;..\Libraries\Device;..\BSP;..\..\core\BlackHouse;..\..\core\Font;..\..\core\STB;..\self;..\..\core;..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\freeRTOS\include;..\Libraries\freeRTOS\config;..\Libraries\freeRTOS\portable\RVDS\ARM_CM3;..\..\core\SmartPi</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -805,6 +805,16 @@
               <FileName>heap_4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\freeRTOS\portable\MemMang\heap_4.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>SmartPi</GroupName>
+          <Files>
+            <File>
+              <FileName>RH_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\core\SmartPi\RH_task.c</FilePath>
             </File>
           </Files>
         </Group>

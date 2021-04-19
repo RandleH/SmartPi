@@ -157,6 +157,14 @@ int main(void){
                   &Handler_BeepBlink );
 
     vTaskStartScheduler();
+
+
+    // xQueueCreate()
+    // xEventGroupCreate()
+    // xEventGroupSetBits()
+    // xEventGroupSetBitsFromISR()
+    // xEventGroupWaitBits()
+    // xEventGroupClearBits()
     
 }
 
