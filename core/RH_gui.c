@@ -144,6 +144,27 @@ void GUI_RefreashScreenArea ( int xs, int ys, int xe, int ye ){
 
 }
 
+void GUI_ClearScreen        ( void ){
+#ifdef RH_DEBUG
+    RH_ASSERT( Screen.areaNeedRefreashHead );
+#endif
+    __Area_t *p = NULL;
+    while( !__Stack_empty( Screen.areaNeedRefreashHead ) ){
+        p = __Stack_pop( Screen.areaNeedRefreashHead );
+        RH_FREE(p);
+    }
+    Screen.areaNeedRefreashPixelCnt = 0;
+
+#if   ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_BIN    )
+    memset( Screen.GRAM , 0, M_SCREEN_CNT*(GUI_Y_WIDTH>>3)*GUI_X_WIDTH*sizeof(__Pixel_t) );
+#elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
+    memset( Screen.GRAM , 0, M_SCREEN_CNT*GUI_Y_WIDTH*GUI_X_WIDTH*sizeof(__Pixel_t) );
+#elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
+    memset( Screen.GRAM , 0, M_SCREEN_CNT*GUI_Y_WIDTH*GUI_X_WIDTH*sizeof(__Pixel_t) );
+#endif
+    GUI_RefreashScreenArea( 0, 0, GUI_X_WIDTH-1, GUI_Y_WIDTH-1 );
+}
+
 void GUI_RefreashScreen     ( void ){
     __exit( Screen.areaNeedRefreashHead == NULL );
     __Area_t *p = NULL;

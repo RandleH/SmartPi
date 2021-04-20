@@ -14,6 +14,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+
+
+#include "RH_task.h"
+
 static inline ID_t __config_UI_joystick(void){
     __GUI_Object_t cfg_obj = {0};
 
@@ -111,14 +115,16 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer  ,
     *pulTimerTaskStackSize    = configMINIMAL_STACK_SIZE;    /* 任务堆栈大小 */
 }
 
-static StaticTask_t   GUI_Task_TCB;
-static StackType_t    GUI_Task_Stack[256];
+// static StaticTask_t   GUI_Task_TCB;
+// static StackType_t    GUI_Task_Stack[256];
 void Task_UI(void* param){
     ID_t ID_JOY = __config_UI_joystick();
     while(1){
+        taskENTER_CRITICAL();
         GUI_object_adjust(ID_JOY, joystick_data[0], joystick_data[1]);
+        taskEXIT_CRITICAL();
         GUI_RefreashScreen();
-        vTaskDelay(1);
+        vTaskDelay(10);
     }
     
 }
@@ -132,29 +138,31 @@ int main(void){
     BEEP_Init();
     GUI_API_Init ();
     GUI_Init();
-    NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
+    // NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
 
-    xTaskCreateStatic( Task_UI ,
-                       "Task UI",     
-                       256,
-                       NULL,
-                       3,
-                       GUI_Task_Stack ,
-                       &GUI_Task_TCB );
+    // xTaskCreateStatic( Task_UI ,
+    //                    "Task UI",     
+    //                    256,
+    //                    NULL,
+    //                    3,
+    //                    GUI_Task_Stack ,
+    //                    &GUI_Task_TCB );
 
-    xTaskCreate(  Task_LedBlink      ,
-                  "Led Blink"        ,   
-                  256                ,
-                  NULL               ,
-                  3                  ,
-                  &Handler_LedBlink );
+    // xTaskCreate(  Task_LedBlink      ,
+    //               "Led Blink"        ,   
+    //               256                ,
+    //               NULL               ,
+    //               3                  ,
+    //               &Handler_LedBlink );
 
-    xTaskCreate(  Task_BeepBlink     ,
-                  "Led Blink"        ,
-                  256                ,
-                  NULL               ,
-                  3                  ,
-                  &Handler_BeepBlink );
+    // xTaskCreate(  Task_BeepBlink     ,
+    //               "Led Blink"        ,
+    //               256                ,
+    //               NULL               ,
+    //               3                  ,
+    //               &Handler_BeepBlink );
+
+    __Task_init();
 
     vTaskStartScheduler();
 
@@ -165,7 +173,7 @@ int main(void){
     // xEventGroupSetBitsFromISR()
     // xEventGroupWaitBits()
     // xEventGroupClearBits()
-    
+
 }
 
 

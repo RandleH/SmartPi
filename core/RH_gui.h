@@ -25,6 +25,7 @@ void GUI_set_penColor       ( __Pixel_t penColor );
 void GUI_RefreashScreenArea ( int xs,int ys,int xe,int ye );
 void GUI_AddScreenArea      ( int xs,int ys,int xe,int ye );
 
+void GUI_ClearScreen        (void);
 void GUI_RefreashScreen     (void);
 
 void GUI_rect_raw           ( int xs,int ys,int xe,int ye );

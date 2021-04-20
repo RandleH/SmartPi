@@ -1,8 +1,24 @@
 #ifndef _RH_TASK_H
 #define _RH_TASK_H 
 
+
 #include "FreeRTOS.h"
 #include "event_groups.h"
+
+#include "RH_common.h"
+
+struct __SmartPiService_t{
+    uint32_t          serv_ID;
+    volatile uint32_t serv_ID_tmp;
+    
+    bool              enter;
+    volatile bool     exit;
+    
+    int8_t            cache_task_num;
+    TaskHandle_t*     cache_task_handle;
+};
+typedef struct __SmartPiService_t __SmartPiService_t;
+extern __SmartPiService_t SmartPi;
 
 typedef enum{
     kHWEvent_JoySitck_Pressed  = (1<<0),   // 0
@@ -20,17 +36,20 @@ typedef enum{
 
     kHWEvent_USB_PlugIn        = (1<<10),  // 10
     kHWEvent_USB_PlugOut       = (1<<11),  // 11
-
     
-}E_ExHWEvent;
+}E_HWEvent_t;
 
+typedef enum{
+    kSWEvent_StateChanged      = (1<<0),   // 0 
+}E_SWEvent_t;
 
 
 extern EventGroupHandle_t EGHandle_Hardware;
 extern EventGroupHandle_t EGHandle_Software;
 
 
-void __Event_hw_init( void );
+void __Event_init  ( void );
+void __Task_init   ( void );
 
 #endif
 

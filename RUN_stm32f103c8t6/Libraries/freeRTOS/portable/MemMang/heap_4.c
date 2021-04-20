@@ -500,3 +500,9 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
     }
     taskEXIT_CRITICAL();
 }
+
+#include <string.h>
+void * pvPortCalloc( size_t count, size_t size ){
+    void* ptr = pvPortMalloc(count*size);
+    return memset( ptr,'\0', count*size);
+}

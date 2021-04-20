@@ -8,14 +8,14 @@
 extern "C" {
 #endif
 
-#define RH_DATA_CALLOC(x,s)           calloc(x,s)
-#define RH_DATA_MALLOC(x)             malloc(x)
-#define RH_DATA_FREE(x)               free(x)
+#define RH_DATA_CALLOC(x,s)           RH_CALLOC(x,s)
+#define RH_DATA_MALLOC(x)             RH_MALLOC(x)
+#define RH_DATA_FREE(x)               RH_FREE(x)
 
 
-#define RH_DATA_HASH_CALLOC(x,s)      calloc(x,s)
-#define RH_DATA_HASH_MALLOC(x)        malloc(x)
-#define RH_DATA_HASH_FREE(x)          free(x)
+#define RH_DATA_HASH_CALLOC(x,s)      RH_CALLOC(x,s)
+#define RH_DATA_HASH_MALLOC(x)        RH_MALLOC(x)
+#define RH_DATA_HASH_FREE(x)          RH_FREE(x)
 
 /*=====================================================================
 > Data Structure Reference

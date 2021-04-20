@@ -175,7 +175,7 @@ void vPortFree( void * pv ) PRIVILEGED_FUNCTION;
 void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
-
+void * pvPortCalloc( size_t count, size_t size );
 #if( configSTACK_ALLOCATION_FROM_SEPARATE_HEAP == 1 )
     void *pvPortMallocStack( size_t xSize ) PRIVILEGED_FUNCTION;
     void vPortFreeStack( void *pv ) PRIVILEGED_FUNCTION;
