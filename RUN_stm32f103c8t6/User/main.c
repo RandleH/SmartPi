@@ -138,29 +138,6 @@ int main(void){
     BEEP_Init();
     GUI_API_Init ();
     GUI_Init();
-    // NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
-
-    // xTaskCreateStatic( Task_UI ,
-    //                    "Task UI",     
-    //                    256,
-    //                    NULL,
-    //                    3,
-    //                    GUI_Task_Stack ,
-    //                    &GUI_Task_TCB );
-
-    // xTaskCreate(  Task_LedBlink      ,
-    //               "Led Blink"        ,   
-    //               256                ,
-    //               NULL               ,
-    //               3                  ,
-    //               &Handler_LedBlink );
-
-    // xTaskCreate(  Task_BeepBlink     ,
-    //               "Led Blink"        ,
-    //               256                ,
-    //               NULL               ,
-    //               3                  ,
-    //               &Handler_BeepBlink );
 
     __Task_init();
 

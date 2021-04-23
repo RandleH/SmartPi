@@ -146,7 +146,7 @@ void __TaskStatic_led_heart( void* param ){
         LED_Set(1);
         vTaskDelay(10);
         LED_Set(0);
-        vTaskDelay(1500);
+        vTaskDelay(500);
     }
 }
 
