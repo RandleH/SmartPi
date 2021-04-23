@@ -37,10 +37,14 @@ const char* __ldtoa_BIN   (uint32_t  x);
 const char* __ftoa_BIN    (float     x); // ftoa_BIN
 
 /*===========================================================================================================================
+ > Sort Programming Reference
+============================================================================================================================*/
+int __insertsort (void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
+int __shellsort  (void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
+
+/*===========================================================================================================================
  > Memory Programming Reference
 ============================================================================================================================*/
-
-
 
 extern size_t RH_Global_alloced_byte;
 extern size_t RH_Global_free_byte;

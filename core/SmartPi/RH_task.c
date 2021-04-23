@@ -26,43 +26,54 @@ static void __subtask_0x00000000_UI( void* param){
 #ifdef RH_DEBUG	
 	RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000000 );
 #endif
-    taskENTER_CRITICAL();
-	ID_t ID_JoyStick = 0;
+
+	ID_t ID_Menu = 0;
 	{
-		__GUI_Object_t cfg_obj = {0};
-
-	    GUI_object_quickSet(&cfg_obj);
-
-	    cfg_obj.style       = kGUI_ObjStyle_joystick;
-	    cfg_obj.area.xs     = 10;
-	    cfg_obj.area.ys     = 10;
-	    cfg_obj.area.height = 45;
-	    cfg_obj.area.width  = 45;
-	    cfg_obj.min[0]      = 0;
-	    cfg_obj.max[0]      = 4096;
-	    cfg_obj.min[1]      = 0;
-	    cfg_obj.max[1]      = 4096;
-	    cfg_obj.font        = kGUI_FontStyle_ArialRounded_Bold;
-	    cfg_obj.text_color  = M_COLOR_WHITE;
-	    cfg_obj.text_size   = 8;
-	    cfg_obj.text_align  = kGUI_FontAlign_Middle;
-	    cfg_obj.showFrame   = true;
-	    cfg_obj.bk_color    = M_COLOR_BLACK;
-	    cfg_obj.val[0]      = joystick_data[0];
-	    cfg_obj.val[1]      = joystick_data[1];
-
-	    ID_JoyStick = GUI_object_create( &cfg_obj );
-	}
+		__GUI_Menu_t cfg = {0};
     
-    GUI_object_insert( ID_JoyStick );
-    taskEXIT_CRITICAL();
+        cfg.area.xs = 10;
+        cfg.area.ys = 10;
+        cfg.area.height = 50;
+        cfg.area.width  = 90;
+        cfg.nItem = 2;
+        cfg.title = "Title";
+        cfg.color_title = M_COLOR_WHITE;
+        cfg.size  = 10;
+        
+        cfg.bk_color = M_COLOR_BLACK;
+        cfg.sl_color = M_COLOR_WHITE;
+        cfg.text_color = M_COLOR_WHITE;
+
+        __GUI_MenuParam_t m[2] = {0};
+        m[0].text = "Hardware";
+        m[1].text = "About";
+
+        cfg.menuList = m;
+    
+        ID_Menu = GUI_menu_create(&cfg);
+    
+	}
+
+    GUI_menu_frame  ( ID_Menu, 1 );
+    GUI_menu_insert ( ID_Menu );
+    GUI_RefreashScreen();
 	while(1){
         taskENTER_CRITICAL();
-        GUI_object_adjust(ID_JoyStick, joystick_data[0], joystick_data[1]);
-        GUI_RefreashScreen();
+
+        int ans = 0;
+        if( joystick_data[1] > 4000 ){
+            ans = -1;
+        }else if( joystick_data[1] < 1000 ){
+            ans = 1;
+        }else{
+            ans = 0;
+        }
+        GUI_menu_scroll( ID_Menu, ans );
+        GUI_RefreashEntireScreen();
+
         taskEXIT_CRITICAL();
 
-        vTaskDelay(10);
+        vTaskDelay(1);
 	}
 }
 

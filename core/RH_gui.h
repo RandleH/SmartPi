@@ -17,35 +17,36 @@ extern void (*GUI_API_DelayMs)        (unsigned long ms);
 extern void (*GUI_API_AssertParam)    (bool expression,const char* WHAT_IS_WRONG );
 
 
-void RH_PREMAIN GUI_Init    (void);
+void RH_PREMAIN GUI_Init        ( void );
 
-void GUI_set_penSize        ( size_t    penSize  );
-void GUI_set_penColor       ( __Pixel_t penColor );
+void GUI_set_penSize            ( size_t    penSize  );
+void GUI_set_penColor           ( __Pixel_t penColor );
+void GUI_auto_display           ( bool      cmd      );
 
-void GUI_RefreashScreenArea ( int xs,int ys,int xe,int ye );
-void GUI_AddScreenArea      ( int xs,int ys,int xe,int ye );
+void GUI_RefreashScreenArea     ( int xs,int ys,int xe,int ye );
+void GUI_AddScreenArea          ( int xs,int ys,int xe,int ye );
 
-void GUI_ClearScreen        (void);
-void GUI_RefreashScreen     (void);
+void GUI_RefreashScreen         ( void );
+void GUI_RefreashEntireScreen   ( void );
 
-void GUI_rect_raw           ( int xs,int ys,int xe,int ye );
-void GUI_rect_edged         ( int xs,int ys,int xe,int ye );
-void GUI_rect_fill          ( int xs,int ys,int xe,int ye );
-void GUI_rect_round         ( int xs,int ys,int xe,int ye );
+void GUI_rect_raw               ( int xs,int ys,int xe,int ye );
+void GUI_rect_edged             ( int xs,int ys,int xe,int ye );
+void GUI_rect_fill              ( int xs,int ys,int xe,int ye );
+void GUI_rect_round             ( int xs,int ys,int xe,int ye );
 
-void GUI_circle_raw         ( int x ,int y ,int d );
-void GUI_circle_edged       ( int x ,int y ,int d );
-void GUI_circle_fill        ( int x ,int y ,int d );
-void GUI_circle_qrt1_fill   ( int x ,int y ,int r );
-void GUI_circle_qrt2_fill   ( int x ,int y ,int r );
-void GUI_circle_qrt3_fill   ( int x ,int y ,int r );
-void GUI_circle_qrt4_fill   ( int x ,int y ,int r );
-void GUI_circle_qrt1_raw    ( int x ,int y ,int r );
-void GUI_circle_qrt2_raw    ( int x ,int y ,int r );
-void GUI_circle_qrt3_raw    ( int x ,int y ,int r );
-void GUI_circle_qrt4_raw    ( int x ,int y ,int r );
+void GUI_circle_raw             ( int x ,int y ,int d );
+void GUI_circle_edged           ( int x ,int y ,int d );
+void GUI_circle_fill            ( int x ,int y ,int d );
+void GUI_circle_qrt1_fill       ( int x ,int y ,int r );
+void GUI_circle_qrt2_fill       ( int x ,int y ,int r );
+void GUI_circle_qrt3_fill       ( int x ,int y ,int r );
+void GUI_circle_qrt4_fill       ( int x ,int y ,int r );
+void GUI_circle_qrt1_raw        ( int x ,int y ,int r );
+void GUI_circle_qrt2_raw        ( int x ,int y ,int r );
+void GUI_circle_qrt3_raw        ( int x ,int y ,int r );
+void GUI_circle_qrt4_raw        ( int x ,int y ,int r );
 
-void GUI_sausage_raw        ( int xs, int ys, int xe, int ye );
+void GUI_sausage_raw            ( int xs, int ys, int xe, int ye );
 
 typedef enum{
     kGUI_Appearance_Light  ,
@@ -146,15 +147,39 @@ E_Status_t                GUI_object_insert    ( ID_t ID );
 E_Status_t                GUI_object_delete    ( ID_t ID );//
 
 
+struct __GUI_MenuParam_t{
+    const char* text;
+};
+typedef struct __GUI_MenuParam_t __GUI_MenuParam_t;
 
+struct __GUI_Menu_t{
+    const char*           title;                /* 菜单标题名字 */
+    __Pixel_t             color_title;          /* 菜单标题栏字体颜色 */
+    __Pixel_t             bk_color_title;       /* 菜单标题栏背景色 */
+    
+    __Pixel_t             bk_color;             /* 菜单背景色 */
+    __Pixel_t             text_color;           /* 菜单栏字体颜色 */
+    __Pixel_t             sl_color;             /* 菜单栏选中色 */
+    
+    E_GUI_FontStyle_t     font;                 /* 菜单字体 */
+    
+    __Area_t              area;                 /* 菜单屏幕所占区域 */
+    int8_t                nItem;                /* 菜单栏目条数 */
+    __GUI_MenuParam_t*    menuList;             /* 菜单栏目配置数组 */
+    
+    bool                  icon_cmd;             /* 菜单是否需要图标 */
+    
+    int8_t                size;                 /* 菜单显示大小 */
+    
+    
+    const void*  const    history;              /* [内部使用] 缓存入口 */
+};
+typedef struct __GUI_Menu_t __GUI_Menu_t;
 
-
-
-
-
-
-
-
+ID_t            RH_RESULT GUI_menu_create      ( const __GUI_Menu_t* config );
+E_Status_t                GUI_menu_insert      ( ID_t ID );
+E_Status_t                GUI_menu_frame       ( ID_t ID , bool cmd );
+int                       GUI_menu_scroll      ( ID_t ID , int  cmd );
 
 
 
