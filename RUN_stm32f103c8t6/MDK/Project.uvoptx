@@ -162,66 +162,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>97</LineNumber>
+          <LineNumber>199</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134234018</Address>
+          <Address>134239566</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\..\core\SmartPi\RH_task.c</Filename>
+          <Filename>..\USER\src\stm32f10x_it.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../../core/SmartPi/RH_task.c\97</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>57</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134239402</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\..\core\SmartPi\RH_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../../core/SmartPi/RH_task.c\57</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>206</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224876</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\..\core\RH_gui.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../../core/RH_gui.c\206</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>221</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224956</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\..\core\RH_gui.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../../core/RH_gui.c\221</Expression>
+          <Expression>\\Project\../USER/src/stm32f10x_it.c\199</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

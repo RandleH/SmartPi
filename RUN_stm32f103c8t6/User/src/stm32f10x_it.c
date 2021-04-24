@@ -166,23 +166,37 @@ void SysTick_Handler(void)
 
 #include "stm32f10x_exti.h"
 #include "delay.h"
+
 #include "joystick.h"
+
+#include "FreeRTOS.h"
+#include "event_groups.h"
+
+#include "RH_task.h"
 
 #define EXTI_OK_LINE             EXTI_Line7
 
 #define JOYSTICK_IRQHandler      EXTI9_5_IRQHandler
 
 void JOYSTICK_IRQHandler(void){
+    BaseType_t    xResult;
+    BaseType_t    xHigherPriorityTaskWoken = pdFALSE;
+
+// xTimerPendFunctionCallFromISR
     if(EXTI_GetITStatus(EXTI_OK_LINE)!=RESET){
+        xResult = xEventGroupSetBitsFromISR( EGHandle_Hardware, kHWEvent_JoySitck_Pressed, &xHigherPriorityTaskWoken );
+
+        if( xResult != pdFAIL ){
+            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+        }
         //...//
     }
-    // delay_ms(150);
-  EXTI_ClearITPendingBit(EXTI_OK_LINE);
+    EXTI_ClearITPendingBit(EXTI_OK_LINE);
 }
 
 void assert_failed(uint8_t* file, uint32_t line){
-  // const char* FILE = file;
-  // uint32_t    LINE = line;
+    const char* FILE = file;
+    uint32_t    LINE = line;
     while(1);
 }
 

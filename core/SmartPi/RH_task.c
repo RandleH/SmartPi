@@ -22,7 +22,27 @@ void __Event_init( void ){
 #endif
 }
 
-static void __subtask_0x00000000_UI( void* param){
+/* 空闲任务控制块 */
+/* 空闲任务任务栈 */
+static StaticTask_t   Idle_Task_TCB;
+static StackType_t    Idle_Task_Stack[configMINIMAL_STACK_SIZE];
+void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer, StackType_t  ** ppxIdleTaskStackBuffer, uint32_t * pulIdleTaskStackSize   ){
+    *ppxIdleTaskTCBBuffer    = &Idle_Task_TCB;             /* 任务控制块内存 */ 
+    *ppxIdleTaskStackBuffer  = Idle_Task_Stack;            /* 任务堆栈内存 */ 
+    *pulIdleTaskStackSize    = configMINIMAL_STACK_SIZE;   /* 任务堆栈大小 */
+}
+
+/* 定时器任务控制块 */
+/* 定时器任务栈 */
+static StaticTask_t   Timer_Task_TCB;
+static StackType_t    Timer_Task_Stack[configTIMER_TASK_STACK_DEPTH];
+void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, StackType_t  ** ppxTimerTaskStackBuffer, uint32_t * pulTimerTaskStackSize  ){
+    *ppxTimerTaskTCBBuffer    = &Timer_Task_TCB;             /* 任务控制块内存 */ 
+    *ppxTimerTaskStackBuffer  = Timer_Task_Stack;            /* 任务堆栈内存 */ 
+    *pulTimerTaskStackSize    = configMINIMAL_STACK_SIZE;    /* 任务堆栈大小 */
+}
+
+static void __subtask_0x00000000_UI( void* param ){
 #ifdef RH_DEBUG	
 	RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000000 );
 #endif
@@ -30,51 +50,78 @@ static void __subtask_0x00000000_UI( void* param){
 	ID_t ID_Menu = 0;
 	{
 		__GUI_Menu_t cfg = {0};
-    
-        cfg.area.xs = 10;
-        cfg.area.ys = 10;
-        cfg.area.height = 50;
-        cfg.area.width  = 90;
+        cfg.area.xs = 0;
+        cfg.area.ys = 0;
+        cfg.area.height = RH_CFG_SCREEN_HEIGHT -1;
+        cfg.area.width  = RH_CFG_SCREEN_WIDTH  -1;
         cfg.nItem = 2;
-        cfg.title = "Title";
+        cfg.title = "SmartPi";
         cfg.color_title = M_COLOR_WHITE;
         cfg.size  = 10;
         
-        cfg.bk_color = M_COLOR_BLACK;
-        cfg.sl_color = M_COLOR_WHITE;
-        cfg.text_color = M_COLOR_WHITE;
+        cfg.bk_color    = M_COLOR_BLACK;
+        cfg.sl_color    = M_COLOR_WHITE;
+        cfg.text_color  = M_COLOR_WHITE;
 
         __GUI_MenuParam_t m[2] = {0};
         m[0].text = "Hardware";
         m[1].text = "About";
-
         cfg.menuList = m;
     
         ID_Menu = GUI_menu_create(&cfg);
-    
 	}
 
-    GUI_menu_frame  ( ID_Menu, 1 );
+    GUI_menu_frame  ( ID_Menu, 0 );
     GUI_menu_insert ( ID_Menu );
     GUI_RefreashScreen();
 	while(1){
-        taskENTER_CRITICAL();
-
         int ans = 0;
-        if( joystick_data[1] > 4000 ){
+
+        EventBits_t xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down,
+                                                   pdTRUE,          // 清除该位
+                                                   pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                                   portMAX_DELAY ); // 永久等待
+
+        if( xResult&kHWEvent_JoySitck_Up ){
             ans = -1;
-        }else if( joystick_data[1] < 1000 ){
+        }else if( xResult&kHWEvent_JoySitck_Down ){
             ans = 1;
         }else{
             ans = 0;
         }
+
+        taskENTER_CRITICAL();
         GUI_menu_scroll( ID_Menu, ans );
         GUI_RefreashEntireScreen();
-
         taskEXIT_CRITICAL();
 
-        vTaskDelay(1);
+        // vTaskDelay(10);
 	}
+}
+
+static void __subtask_0x00000000_CTRL( void* param ){
+#ifdef RH_DEBUG 
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000000 );
+#endif
+    while(1){
+
+        if( joystick_data[1] > 4000 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+        }else if( joystick_data[1] < 1000 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+        }
+
+        if( joystick_data[0] > 4000 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+        }else if( joystick_data[0] < 1000 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+        }
+        vTaskDelay(10);
+    }
 }
 
 
@@ -88,40 +135,49 @@ void __TaskStatic_main( void* param ){
         switch( SmartPi.serv_ID ){
 
 case 0x00000000:{
+
+    // Launch sub_task 1
+    // Launch sub task 2
+    // ...
+    taskENTER_CRITICAL();
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = RH_MALLOC( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000000_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000000_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+
+    // 进入阻塞, 直到用户有按键选择发生
+    EventBits_t xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Pressed,
+                                               pdTRUE,          // 清除该位
+                                               pdTRUE,          // 等待所有指定的Bit
+                                               portMAX_DELAY ); // 永久等待
+
+    // Delete sub_task 1
+    // Delete sub_task 2
+    // ...
+    taskENTER_CRITICAL();
+    for( int i=0; i<SmartPi.cache_task_num; i++ ){
+        vTaskDelete( SmartPi.cache_task_handle[i] );
+    }
+    RH_FREE( SmartPi.cache_task_handle );
+    taskEXIT_CRITICAL();
+
+    SmartPi.serv_ID         = 0x00000001;// SmartPi.serv_ID_tmp;
+    SmartPi.cache_task_num  = 0;
+    
+    break;
+}
+
+case 0x00000001:{
     if( SmartPi.enter ){
-        // Launch sub_task 1
-        // Launch sub task 2
-        // ...
-        taskENTER_CRITICAL();
-        SmartPi.cache_task_num    = 1;
-        SmartPi.cache_task_handle = RH_MALLOC( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
-
-        RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000000_UI , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-
-        taskEXIT_CRITICAL();
-
-        SmartPi.enter = false;
-    }else if( SmartPi.exit ){
-        // Delete sub_task 1
-        // Delete sub_task 2
-        // ...
-        taskENTER_CRITICAL();
-        for( int i=0; i<SmartPi.cache_task_num; i++ ){
-            vTaskDelete( SmartPi.cache_task_handle[i] );
-        }
-        RH_FREE( SmartPi.cache_task_handle );
-        taskEXIT_CRITICAL();
-
-        SmartPi.serv_ID = SmartPi.serv_ID_tmp;
-        SmartPi.enter = true;
-        SmartPi.exit  = false;
+        GUI_rect_raw(30,30,40,40);
+        GUI_RefreashScreen();
     }
     break;
 }
-    
-        
+
+
         }
-        // GUI_RefreashScreen();
         vTaskDelay(10);
     }
 }
