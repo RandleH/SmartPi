@@ -41,6 +41,9 @@ typedef enum{
 
 typedef enum{
     kSWEvent_StateChanged      = (1<<0),   // 0 
+    kSWEvent_UI_Finished       = (1<<1),   // 1
+    kSWEvent_CTRL_Finished     = (1<<2),   // 2
+    
 }E_SWEvent_t;
 
 

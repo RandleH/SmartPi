@@ -47,6 +47,10 @@ static void __subtask_0x00000000_UI( void* param ){
 	RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000000 );
 #endif
 
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
 	ID_t ID_Menu = 0;
 	{
 		__GUI_Menu_t cfg = {0};
@@ -70,40 +74,64 @@ static void __subtask_0x00000000_UI( void* param ){
     
         ID_Menu = GUI_menu_create(&cfg);
 	}
-
     GUI_menu_frame  ( ID_Menu, 0 );
     GUI_menu_insert ( ID_Menu );
-    GUI_RefreashScreen();
-	while(1){
-        int ans = 0;
+    GUI_RefreashEntireScreen();
+    EventBits_t xResult;
 
-        EventBits_t xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down,
-                                                   pdTRUE,          // 清除该位
-                                                   pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
-                                                   portMAX_DELAY ); // 永久等待
-
-        if( xResult&kHWEvent_JoySitck_Up ){
-            ans = -1;
-        }else if( xResult&kHWEvent_JoySitck_Down ){
-            ans = 1;
-        }else{
-            ans = 0;
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/    
+	while( EXIT == false ){
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down|kHWEvent_JoySitck_Pressed,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
         }
 
+
+        int ans = 0;
+        if     ( xResult&kHWEvent_JoySitck_Up   )  { ans = -1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up   ); }
+        else if( xResult&kHWEvent_JoySitck_Down )  { ans =  1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Down ); }
+        else                                       ans =  0;
+        
         taskENTER_CRITICAL();
         GUI_menu_scroll( ID_Menu, ans );
         GUI_RefreashEntireScreen();
         taskEXIT_CRITICAL();
-
-        // vTaskDelay(10);
 	}
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/        
+    // Delete cache or object.
+
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
+    //...//
+
+    while(1); 
 }
 
 static void __subtask_0x00000000_CTRL( void* param ){
 #ifdef RH_DEBUG 
     RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000000 );
 #endif
-    while(1){
+
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/    
+    bool EXIT = false;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/       
+    while( EXIT==false ){
+        EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+        }
 
         if( joystick_data[1] > 4000 ){
             xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
@@ -122,6 +150,12 @@ static void __subtask_0x00000000_CTRL( void* param ){
         }
         vTaskDelay(10);
     }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/     
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);  
 }
 
 
@@ -136,25 +170,29 @@ void __TaskStatic_main( void* param ){
 
 case 0x00000000:{
 
-    // Launch sub_task 1
-    // Launch sub task 2
-    // ...
     taskENTER_CRITICAL();
     SmartPi.cache_task_num    = 2;
     SmartPi.cache_task_handle = RH_MALLOC( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left    |
+                                             kHWEvent_JoySitck_Right   |
+                                             kHWEvent_JoySitck_Down    |
+                                             kHWEvent_JoySitck_Up      |
+                                             kHWEvent_JoySitck_Pressed );
+
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+
     RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000000_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
     RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000000_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
 
-    // 进入阻塞, 直到用户有按键选择发生
-    EventBits_t xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Pressed,
-                                               pdTRUE,          // 清除该位
-                                               pdTRUE,          // 等待所有指定的Bit
-                                               portMAX_DELAY ); // 永久等待
+    // 进入阻塞, 直到子任务完成为止
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                   pdTRUE,          // 清除该位
+                                   pdTRUE,          // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
 
-    // Delete sub_task 1
-    // Delete sub_task 2
-    // ...
     taskENTER_CRITICAL();
     for( int i=0; i<SmartPi.cache_task_num; i++ ){
         vTaskDelete( SmartPi.cache_task_handle[i] );
