@@ -10,6 +10,8 @@
 struct __SmartPiService_t{
     uint32_t          serv_ID;
     volatile uint32_t serv_ID_tmp;
+
+    int8_t            numOfNextNodes;
     
     bool              enter;
     volatile bool     exit;
@@ -43,7 +45,7 @@ typedef enum{
     kSWEvent_StateChanged      = (1<<0),   // 0 
     kSWEvent_UI_Finished       = (1<<1),   // 1
     kSWEvent_CTRL_Finished     = (1<<2),   // 2
-    
+
 }E_SWEvent_t;
 
 

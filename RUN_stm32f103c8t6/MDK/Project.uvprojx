@@ -816,6 +816,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\core\SmartPi\RH_task.c</FilePath>
             </File>
+            <File>
+              <FileName>RH_subtask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\core\SmartPi\RH_subtask.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
