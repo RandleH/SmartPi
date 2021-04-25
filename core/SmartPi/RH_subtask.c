@@ -133,6 +133,9 @@ void __subtask_0x00000000_CTRL ( void* param ){
 
 
 void __subtask_0x00000001_UI   ( void* param ){
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
     bool EXIT = false;
     ID_t ID_Menu = 0;
 
@@ -246,6 +249,92 @@ void __subtask_0x00000001_CTRL ( void* param ){
             SmartPi.serv_ID_tmp = 0;
             EXIT = true;
         }
+        vTaskDelay(10);
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);
+}
+
+void __subtask_default_UI      ( void* param ){
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+    ID_t ID_Object = 0;
+
+    {
+        __GUI_Object_t cfg = {0};
+
+        GUI_object_quickSet(&cfg);
+
+        cfg.style       = kGUI_ObjStyle_text;
+        cfg.area.xs     = 30;
+        cfg.area.ys     = 30;
+        cfg.area.height = 12;
+        cfg.area.width  = 70;
+        cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
+        cfg.text_color  = M_COLOR_WHITE;
+        cfg.text        = "No preview.";
+        cfg.text_size   = 8;
+        cfg.text_align  = kGUI_FontAlign_Left;
+        cfg.showFrame   = false;
+
+        cfg.bk_color    = M_COLOR_BLACK;
+
+        ID_Object = GUI_object_create( &cfg );
+        
+    }
+    
+    GUI_object_insert( ID_Object );
+    GUI_RefreashScreen();
+    
+    EventBits_t xResult;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Pressed,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+        }
+
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    // GUI_object_delete( ID_Object );
+    GUI_RefreashScreen();
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
+    //...//
+
+    while(1);
+}
+void __subtask_default_CTRL    ( void* param ){
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT==false ){
+        EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+        
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            SmartPi.serv_ID_tmp = 0;
+            EXIT = true;
+        }
+        
         vTaskDelay(10);
     }
 

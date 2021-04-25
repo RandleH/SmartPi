@@ -46,8 +46,8 @@ extern void __subtask_0x00000000_CTRL ( void* param );
 extern void __subtask_0x00000000_UI   ( void* param );
 extern void __subtask_0x00000001_CTRL ( void* param );
 extern void __subtask_0x00000001_UI   ( void* param );
-
-
+extern void __subtask_default_UI      ( void* param );
+extern void __subtask_default_CTRL    ( void* param );
 
 static StaticTask_t   Task_TCB_main;
 static StackType_t    Task_Stack_main[256];
@@ -147,14 +147,38 @@ case 0x00000001:{
     break;
 }
 
-// $ROOT$ -> About
-case 0x00000002:{
- 
-    GUI_rect_raw(30,30,80,40);
-    GUI_RefreashScreen();
+default:{
+    taskENTER_CRITICAL();
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = RH_MALLOC( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Pressed );
+
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_default_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_default_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+    
+    // 进入阻塞, 直到子任务完成为止
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                   pdTRUE,          // 清除该位
+                                   pdTRUE,          // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
+    taskENTER_CRITICAL();
+    for( int i=0; i<SmartPi.cache_task_num; i++ ){
+        vTaskDelete( SmartPi.cache_task_handle[i] );
+    }
+    RH_FREE( SmartPi.cache_task_handle );
+    taskEXIT_CRITICAL();
+
+    SmartPi.serv_ID         = 0x00000000;
+    SmartPi.cache_task_num  = 0;
     
     break;
 }
+                
         }
         vTaskDelay(10);
     }
