@@ -158,40 +158,7 @@
           <Name>-T0</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>199</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134240154</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\USER\src\stm32f10x_it.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../USER/src/stm32f10x_it.c\199</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>209</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134234056</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\..\core\SmartPi\RH_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../../core/SmartPi/RH_task.c\209</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -203,6 +170,16 @@
           <WinNumber>1</WinNumber>
           <ItemText>SmartPi</ItemText>
         </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>file</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>line,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
@@ -210,7 +187,7 @@
       <DebugFlag>
         <trace>0</trace>
         <periodic>0</periodic>
-        <aLwin>1</aLwin>
+        <aLwin>0</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
         <aSer2>0</aSer2>

@@ -7,16 +7,19 @@
 
 #include "RH_common.h"
 
-struct __SmartPiService_t{
-    uint32_t          serv_ID;
-    volatile uint32_t serv_ID_tmp;
+#include "RH_data.h"
 
-    int8_t            numOfNextNodes;
+struct __SmartPiService_t{
+    uint32_t          serv_ID;         // 当前业务号
+    __Stack_t*        serv_ID_Stack;   // 业务栈
+    volatile uint32_t serv_ID_tmp;     // 临时预选业务号
+
+    int8_t            numOfNextNodes;  
     
     bool              enter;
     volatile bool     exit;
     
-    int8_t            cache_task_num;
+    int8_t            cache_task_num;    
     TaskHandle_t*     cache_task_handle;
 };
 typedef struct __SmartPiService_t __SmartPiService_t;

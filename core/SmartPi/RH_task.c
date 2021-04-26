@@ -41,13 +41,20 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, Stac
     *ppxTimerTaskStackBuffer  = Timer_Task_Stack;            /* 任务堆栈内存 */ 
     *pulTimerTaskStackSize    = configMINIMAL_STACK_SIZE;    /* 任务堆栈大小 */
 }
+#ifdef MAKE_TASK
+#undef MAKE_TASK
+#endif
 
-extern void __subtask_0x00000000_CTRL ( void* param );
-extern void __subtask_0x00000000_UI   ( void* param );
-extern void __subtask_0x00000001_CTRL ( void* param );
-extern void __subtask_0x00000001_UI   ( void* param );
-extern void __subtask_default_UI      ( void* param );
-extern void __subtask_default_CTRL    ( void* param );
+#define MAKE_TASK( CLASS, ID, TYPE ) __##CLASS##_##ID##_##TYPE
+
+extern void MAKE_TASK( subtask, 0x00000000, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, 0x00000000, UI   ) ( void* param );
+
+extern void MAKE_TASK( subtask, 0x00000001, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, 0x00000001, UI   ) ( void* param );
+
+extern void MAKE_TASK( subtask, default   , CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, default   , UI   ) ( void* param );
 
 static StaticTask_t   Task_TCB_main;
 static StackType_t    Task_Stack_main[256];
@@ -58,7 +65,7 @@ void __TaskStatic_main( void* param ){
         switch( SmartPi.serv_ID ){
 
 case 0x00000000:{
-    memset( &SmartPi, 0, sizeof(SmartPi) );
+
     SmartPi.serv_ID        = 0x00000000;
     SmartPi.serv_ID_tmp    = 1;
     SmartPi.numOfNextNodes = 2;
@@ -101,7 +108,6 @@ case 0x00000000:{
 
 // $ROOT$ -> Hardware
 case 0x00000001:{
-    memset( &SmartPi, 0, sizeof(SmartPi) );
     SmartPi.serv_ID        = 0x00000001;
     SmartPi.serv_ID_tmp    = 1;
     SmartPi.numOfNextNodes = 5;
@@ -136,8 +142,9 @@ case 0x00000001:{
 
     taskEXIT_CRITICAL();
     if( SmartPi.serv_ID_tmp == 0 )
-        SmartPi.serv_ID  = 0x00000000;
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
     else{
+        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
         SmartPi.serv_ID <<= 4;
         SmartPi.serv_ID |= SmartPi.serv_ID_tmp;
     }
@@ -173,7 +180,7 @@ default:{
     RH_FREE( SmartPi.cache_task_handle );
     taskEXIT_CRITICAL();
 
-    SmartPi.serv_ID         = 0x00000000;
+    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
     SmartPi.cache_task_num  = 0;
     
     break;
@@ -233,7 +240,13 @@ void __Task_init( void ){
     xTaskCreateStatic( __TaskStatic_led_heart    , \
                       "__TaskStatic_led_heart"   , \
                       sizeof( Task_Stack_led_heart ), NULL, 4, Task_Stack_led_heart, &Task_TCB_led_heart );
+    
+    memset( &SmartPi, 0, sizeof(SmartPi) );
 
+    SmartPi.serv_ID_Stack = __Stack_createBase( NULL );
+#ifdef RH_DEBUG    
+    RH_ASSERT( SmartPi.serv_ID_Stack );
+#endif
 
 }
 
