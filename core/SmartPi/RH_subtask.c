@@ -226,7 +226,7 @@ void __subtask_0x00000001_CTRL ( void* param ){
                 SmartPi.serv_ID_tmp--;
             xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
             xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
-        }else if( joystick_data[1] < 1000 ){
+        }else if( joystick_data[1] < 100 ){
             if( SmartPi.serv_ID_tmp < SmartPi.numOfNextNodes )
             SmartPi.serv_ID_tmp++;
             xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
@@ -236,7 +236,7 @@ void __subtask_0x00000001_CTRL ( void* param ){
         if( joystick_data[0] > 4000 ){
             xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
             xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
-        }else if( joystick_data[0] < 1000 ){
+        }else if( joystick_data[0] < 100 ){
             xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
             xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
         }
@@ -249,6 +249,139 @@ void __subtask_0x00000001_CTRL ( void* param ){
             SmartPi.serv_ID_tmp = 0;
             EXIT = true;
         }
+        vTaskDelay(10);
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);
+}
+
+void __subtask_0x00000013_UI   ( void* param ){
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+    
+    ID_t ID_Switch = 0;
+    ID_t ID_Text   = 0;
+    
+    // Config [ Switch ]
+    {
+        __GUI_Object_t cfg = {0};
+
+        GUI_object_quickSet(&cfg);
+
+        cfg.style       = kGUI_ObjStyle_switch;
+        cfg.area.xs     = 72;
+        cfg.area.ys     = 20;
+        cfg.area.height = 12;
+        cfg.area.width  = 30;
+        cfg.min[0]      = 0;
+        cfg.max[0]      = 256;
+        cfg.showFrame   = false;
+
+        cfg.bk_color    = M_COLOR_BLACK;
+
+        cfg.val[0]      = 0;
+    
+        ID_Switch = GUI_object_create(&cfg);
+    }
+    
+    // Config [ Text ]
+    {
+        __GUI_Object_t cfg = {0};
+
+        GUI_object_quickSet(&cfg);
+
+        cfg.style       = kGUI_ObjStyle_text;
+        cfg.area.xs     = 20;
+        cfg.area.ys     = 20;
+        cfg.area.height = 12;
+        cfg.area.width  = 40;
+        cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
+        cfg.text_color  = M_COLOR_WHITE;
+        cfg.text        = "PC13";
+        cfg.text_size   = 8;
+        cfg.text_align  = kGUI_FontAlign_Left;
+        cfg.showFrame   = false;
+
+        cfg.bk_color    = M_COLOR_BLACK;
+
+        ID_Text = GUI_object_create( &cfg );
+        
+    }
+
+    GUI_object_insert ( ID_Switch );
+    GUI_object_insert ( ID_Text   );
+    GUI_RefreashEntireScreen();
+    EventBits_t xResult;
+    
+    int ans = 0;
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Right|kHWEvent_JoySitck_Pressed|kHWEvent_JoySitck_Left,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+        }
+
+
+        
+        if     ( xResult&kHWEvent_JoySitck_Right )  { ans = 1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Right ); }
+        else if( xResult&kHWEvent_JoySitck_Left  )  { ans = 0; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left  ); }
+        
+        taskENTER_CRITICAL();
+        GUI_object_adjust( ID_Switch, ans, 0 );
+        GUI_RefreashScreen();
+        taskEXIT_CRITICAL();
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    GUI_object_delete( ID_Switch );
+    GUI_RefreashEntireScreen();
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
+    //...//
+
+    while(1);
+}
+void __subtask_0x00000013_CTRL ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000013 );
+#endif
+
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT==false ){
+        EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+
+        if( joystick_data[0] > 4000 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+        }else if( joystick_data[0] < 100 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+        }
+        
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            SmartPi.serv_ID_tmp = 0;
+            EXIT = true;
+        }
+
         vTaskDelay(10);
     }
 
@@ -311,7 +444,7 @@ void __subtask_default_UI      ( void* param ){
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    // GUI_object_delete( ID_Object );
+    GUI_object_delete( ID_Object );
     GUI_RefreashScreen();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//

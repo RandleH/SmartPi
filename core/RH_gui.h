@@ -144,7 +144,7 @@ __GUI_Object_t*           GUI_object_quickSet  (       __GUI_Object_t* config );
 E_Status_t                GUI_object_adjust    ( ID_t ID  , float  val_0 , float val_1 );
 E_Status_t                GUI_object_frame     ( ID_t ID  , bool   cmd   );
 E_Status_t                GUI_object_insert    ( ID_t ID );
-E_Status_t                GUI_object_delete    ( ID_t ID );//
+E_Status_t                GUI_object_delete    ( ID_t ID );
 
 
 struct __GUI_MenuParam_t{

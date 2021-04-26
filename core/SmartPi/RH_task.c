@@ -53,6 +53,9 @@ extern void MAKE_TASK( subtask, 0x00000000, UI   ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000001, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000001, UI   ) ( void* param );
 
+extern void MAKE_TASK( subtask, 0x00000013, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, 0x00000013, UI   ) ( void* param );
+
 extern void MAKE_TASK( subtask, default   , CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, default   , UI   ) ( void* param );
 
@@ -63,7 +66,7 @@ void __TaskStatic_main( void* param ){
     SmartPi.exit  = false;
     while(1){
         switch( SmartPi.serv_ID ){
-
+// $ROOT$
 case 0x00000000:{
 
     SmartPi.serv_ID        = 0x00000000;
@@ -154,6 +157,47 @@ case 0x00000001:{
     break;
 }
 
+// $ROOT$ -> Hardware -> LED
+case 0x00000013:{
+    SmartPi.serv_ID        = 0x00000013;
+    SmartPi.serv_ID_tmp    = 0;
+    SmartPi.numOfNextNodes = 0;
+
+    taskENTER_CRITICAL();
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left    |
+                                             kHWEvent_JoySitck_Right   |
+                                             kHWEvent_JoySitck_Pressed );
+
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000013_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000013_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+
+    // 进入阻塞, 直到子任务完成为止
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                   pdTRUE,          // 清除该位
+                                   pdTRUE,          // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
+
+    taskENTER_CRITICAL();
+    for( int i=0; i<SmartPi.cache_task_num; i++ ){
+        vTaskDelete( SmartPi.cache_task_handle[i] );
+    }
+
+    taskEXIT_CRITICAL();
+    
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    
+    SmartPi.cache_task_num    = 0;
+    SmartPi.cache_task_handle = NULL;
+    break;
+}
+                
 default:{
     taskENTER_CRITICAL();
     SmartPi.cache_task_num    = 2;
