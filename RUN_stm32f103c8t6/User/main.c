@@ -12,6 +12,7 @@
 #include "joystick.h"
 #include "led.h"
 #include "beeper.h"
+#include "nrf24l01.h" 
 
 /*==============================
  * GUI headfiles
@@ -42,9 +43,11 @@ int main(void){
     JoyStick_Init();
     LED_Init();
     BEEP_Init();
+    NRF24L01_Init();
 
     GUI_API_Init ();
     GUI_Init();
+    
     __Event_init();
     __Task_init();
 
@@ -52,12 +55,6 @@ int main(void){
 
     while(1);
 
-    // xQueueCreate()
-    // xEventGroupCreate()
-    // xEventGroupSetBits()
-    // xEventGroupSetBitsFromISR()
-    // xEventGroupWaitBits()
-    // xEventGroupClearBits()
 
 }
 

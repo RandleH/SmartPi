@@ -29,9 +29,9 @@ void BEEP_Init(void){
 
 void BEEP_Set( int cmd ){
     if( cmd )
-        GPIO_ResetBits(BEEP_GPIO, BEEP_GPIO_PIN);
-    else
         GPIO_SetBits(BEEP_GPIO, BEEP_GPIO_PIN);
+    else
+        GPIO_ResetBits(BEEP_GPIO, BEEP_GPIO_PIN);
 }
 
 
