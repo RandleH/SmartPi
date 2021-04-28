@@ -72,9 +72,9 @@
 #define CS(x)                    GPIO_WriteBit( SPI_GPIO    , SPI_PIN_CS, (BitAction)x)
 #define CE(x)                    GPIO_WriteBit( NRF_GPIO_CE , NRF_PIN_CE, (BitAction)x)
 
-
 uint8_t NRF24L01_TX_Addr[5] = {0};
 uint8_t NRF24L01_RX_Addr[5] = {0};
+
 
 static void __configGPIO(void){
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -180,12 +180,16 @@ static uint8_t __readBuf(uint8_t reg,uint8_t *pBuf,uint8_t len){
 void NRF24L01_Init(void){
     __configGPIO();
     __configSPI();
+    if( !NRF24L01_Check() ){
+        //...//
+        return;
+    }
 
 }
 
 bool NRF24L01_Check(void){
 	uint8_t buf[5]={0};
-	
+	CE(0);
 	__writeBuf  ( NRF24L01_WRITE_REG | TX_ADDR, NRF24L01_TX_Addr, 5 );
 	__readBuf   ( NRF24L01_READ_REG  | TX_ADDR, buf             , 5 );
 	
@@ -195,7 +199,7 @@ bool NRF24L01_Check(void){
 	}
 	return true;
 }
-...
+
 
 
 

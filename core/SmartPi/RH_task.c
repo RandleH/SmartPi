@@ -75,6 +75,9 @@ extern void MAKE_TASK( subtask, 0x00000000, UI   ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000001, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000001, UI   ) ( void* param );
 
+extern void MAKE_TASK( subtask, 0x00000011, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, 0x00000011, UI   ) ( void* param );
+
 extern void MAKE_TASK( subtask, 0x00000012, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000012, UI   ) ( void* param );
 
@@ -209,6 +212,122 @@ case 0x00000001:{
     SmartPi.cache_task_handle = NULL;
     break;
 }
+               
+// $ROOT$ -> Hardware -> NRF24L01
+case 0x00000011:{
+/*====================================================================
+ * Init  初始化
+=====================================================================*/
+    SmartPi.serv_ID        = 0x00000011;
+    SmartPi.serv_ID_tmp    = 1;
+    SmartPi.numOfNextNodes = 5;
+
+    taskENTER_CRITICAL();
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left    |
+                                             kHWEvent_JoySitck_Right   |
+                                             kHWEvent_JoySitck_Down    |
+                                             kHWEvent_JoySitck_Up      |
+                                             kHWEvent_JoySitck_Pressed );
+
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+    
+//    // 用于信息交互的临时数据
+//    struct{
+//
+//    }param;
+
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000011_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000011_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+
+/*====================================================================
+ * Blocked  阻塞区
+=====================================================================*/
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                   pdTRUE,          // 清除该位
+                                   pdTRUE,          // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
+
+/*====================================================================
+ * Clear  清除任务
+=====================================================================*/
+    taskENTER_CRITICAL();
+    for( int i=0; i<SmartPi.cache_task_num; i++ ){
+        vTaskDelete( SmartPi.cache_task_handle[i] );
+    }
+
+    taskEXIT_CRITICAL();
+    
+/*====================================================================
+ * Next  进入下一业务
+=====================================================================*/
+    if( SmartPi.serv_ID_tmp == 0 )
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    else{
+        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        SmartPi.serv_ID <<= 4;
+        SmartPi.serv_ID |= SmartPi.serv_ID_tmp;
+    }
+    
+    SmartPi.cache_task_num    = 0;
+    SmartPi.cache_task_handle = NULL;
+    break;
+}
+                
+// $ROOT$ -> Hardware -> NRF24L01 -> RX Address
+case 0x00000112:{
+/*====================================================================
+ * Init  初始化
+=====================================================================*/
+    SmartPi.serv_ID        = 0x00000112;
+    SmartPi.serv_ID_tmp    = 0;
+    SmartPi.numOfNextNodes = 0;
+    
+    taskENTER_CRITICAL();
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Pressed );
+
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+    
+
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+    
+/*====================================================================
+ * Blocked  阻塞区
+=====================================================================*/
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                   pdTRUE,          // 清除该位
+                                   pdTRUE,          // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
+
+/*====================================================================
+ * Clear  清除任务
+=====================================================================*/
+    taskENTER_CRITICAL();
+    for( int i=0; i<SmartPi.cache_task_num; i++ ){
+        vTaskDelete( SmartPi.cache_task_handle[i] );
+    }
+
+    taskEXIT_CRITICAL();
+    
+/*====================================================================
+ * Next  进入下一业务
+=====================================================================*/
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.cache_task_num    = 0;
+    SmartPi.cache_task_handle = NULL;
+    break;
+}
+                
                 
 // $ROOT$ -> Hardware -> JoyStick
 case 0x00000012:{
