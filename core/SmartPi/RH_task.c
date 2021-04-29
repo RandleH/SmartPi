@@ -5,6 +5,7 @@
 #include "RH_color.h"
 
 #include "joystick.h"
+#include "nrf24l01.h"
 
 /*====================================================================
  * 静态事件句柄和事件组汇总
@@ -78,6 +79,9 @@ extern void MAKE_TASK( subtask, 0x00000001, UI   ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000011, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000011, UI   ) ( void* param );
 
+extern void MAKE_TASK( subtask, 0x00000112, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, 0x00000112, UI   ) ( void* param );
+
 extern void MAKE_TASK( subtask, 0x00000012, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, 0x00000012, UI   ) ( void* param );
 
@@ -94,7 +98,7 @@ extern void MAKE_TASK( subtask, default   , UI   ) ( void* param );
  * SmartPi 主任务
 =====================================================================*/
 static StaticTask_t   Task_TCB_main;
-static StackType_t    Task_Stack_main[256];
+static StackType_t    Task_Stack_main[384];
 void __TaskStatic_main( void* param ){
     SmartPi.enter = true;
     SmartPi.exit  = false;
@@ -279,11 +283,12 @@ case 0x00000011:{
 }
                 
 // $ROOT$ -> Hardware -> NRF24L01 -> RX Address
-case 0x00000112:{
+// $ROOT$ -> Hardware -> NRF24L01 -> TX Address
+case 0x00000112:
+case 0x00000114:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
-    SmartPi.serv_ID        = 0x00000112;
     SmartPi.serv_ID_tmp    = 0;
     SmartPi.numOfNextNodes = 0;
     
@@ -295,10 +300,24 @@ case 0x00000112:{
 
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
+    struct{
+        uint8_t     Addr[5];
+        size_t      size;
+        int         bucket;
+        const char* text;
+    }param;
+    param.size = 5;
+    if( SmartPi.serv_ID==0x00000112 ){
+        param.text = "RX Address:";
+        memcpy( param.Addr, NRF24L01_RX_Addr, 5 );
+    }else{
+        param.text = "TX Address:";
+        memcpy( param.Addr, NRF24L01_TX_Addr, 5 );
+    }
     
-
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_UI   , NULL, 256, &param, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_CTRL , NULL, 128, &param, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
     
 /*====================================================================
@@ -308,7 +327,12 @@ case 0x00000112:{
                                    pdTRUE,          // 清除该位
                                    pdTRUE,          // 等待所有指定的Bit
                                    portMAX_DELAY ); // 永久等待
-
+   
+    if( SmartPi.serv_ID==0x00000112 ){
+        memcpy( NRF24L01_RX_Addr, param.Addr, 5 );
+    }else{
+        memcpy( NRF24L01_TX_Addr, param.Addr, 5 );
+    }
 /*====================================================================
  * Clear  清除任务
 =====================================================================*/
@@ -513,7 +537,6 @@ default:{
 }
                 
         }
-//        vTaskDelay(10);
     }
 }
 
@@ -549,7 +572,7 @@ void __Task_radio_sent( void* param ){
 =====================================================================*/
 #include "led.h"
 static StaticTask_t   Task_TCB_led_heart;
-static StackType_t    Task_Stack_led_heart[128];
+static StackType_t    Task_Stack_led_heart[64];
 void __TaskStatic_led_heart( void* param ){
     while(1){
         LED_Set(1);

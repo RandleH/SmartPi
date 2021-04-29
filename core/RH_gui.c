@@ -1236,13 +1236,20 @@ E_Status_t        GUI_object_frame     ( ID_t ID  , bool  cmd   ){
     __GUI_Object_t* p = (__GUI_Object_t*)(ID);
     
     __Graph_backup_config();
-    if( !p->showFrame && cmd ){
+    if( cmd ){
+        __Graph_set_penColor( p->text_color );
         __Graph_rect_raw(p->area.xs, p->area.ys, p->area.xs+(int)(p->area.width)-1, p->area.ys+(int)(p->area.height)-1, &info_MainScreen, kApplyPixel_fill);
-    }else if( p->showFrame && !cmd ){
+    }else{
+        __Graph_set_penColor( p->bk_color );
         __Graph_rect_raw(p->area.xs, p->area.ys, p->area.xs+(int)(p->area.width)-1, p->area.ys+(int)(p->area.height)-1, &info_MainScreen, kApplyPixel_fill);
     }
     p->showFrame = cmd;
     __Graph_restore_config();
+    
+    GUI_RefreashScreenArea( p->area.xs, \
+                            p->area.ys, \
+                            p->area.xs+(int)(p->area.width )-1, \
+                            p->area.ys+(int)(p->area.height)-1);
     return kStatus_Success;
 }
 
