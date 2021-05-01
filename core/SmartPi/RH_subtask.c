@@ -11,6 +11,8 @@
 
 #include "RH_task.h"
 
+#undef RH_DEBUG
+
 // $ROOT$
 void __subtask_0x00000000_UI   ( void* param ){
 #ifdef RH_DEBUG	

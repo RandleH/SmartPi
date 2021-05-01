@@ -9,8 +9,29 @@
 
 #include "RH_data.h"
 
+typedef enum{
+    ROOT                              , //  /
+
+    ROOT_Hardware                     , //  //
+    
+    ROOT_Hardware_                    , //  ---
+    ROOT_Hardware_NRF24L01            , //  ///
+    ROOT_Hardware_JoyStick            , //  ///      
+    ROOT_Hardware_LED                 , //  ///
+    ROOT_Hardware_Bluetooth           , //  ///
+    ROOT_Hardware_Beeper              , //  ///
+
+    ROOT_Hardware_NRF24L01_           , //  ----
+    ROOT_Hardware_NRF24L01_RXMode     , //  ////
+    ROOT_Hardware_NRF24L01_RXAddress  , //  ////
+    ROOT_Hardware_NRF24L01_TXMode     , //  ////
+    ROOT_Hardware_NRF24L01_TXAddress  , //  ////
+    ROOT_Hardware_NRF24L01_ACK        , //  ////
+
+}E_TaskID_t;
+
 struct __SmartPiService_t{
-    uint32_t          serv_ID;         // 当前业务号
+    E_TaskID_t        serv_ID;         // 当前业务号
     __Stack_t*        serv_ID_Stack;   // 业务栈
     volatile uint32_t serv_ID_tmp;     // 临时预选业务号
 

@@ -25,7 +25,7 @@ TaskHandle_t       THandle_radio_check  = NULL;
 /*====================================================================
  * SmartPi 业务结构体
 =====================================================================*/
-__SmartPiService_t SmartPi           = {0};
+__SmartPiService_t SmartPi           = {.serv_ID = ROOT};
 
 /*====================================================================
  * FreeRTOS事件配置
@@ -65,6 +65,9 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, Stac
 /*====================================================================
  * SmartPi 子任务
 =====================================================================*/
+
+
+
 #ifdef MAKE_TASK
 #undef MAKE_TASK
 #endif
@@ -105,11 +108,11 @@ void __TaskStatic_main( void* param ){
     while(1){
         switch( SmartPi.serv_ID ){
 // $ROOT$
-case 0x00000000:{
+case ROOT:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
-    SmartPi.serv_ID        = 0x00000000;
+    SmartPi.serv_ID        = ROOT;
     SmartPi.serv_ID_tmp    = 1;
     SmartPi.numOfNextNodes = 2;
 
@@ -151,18 +154,18 @@ case 0x00000000:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID         |= SmartPi.serv_ID_tmp;
-    SmartPi.cache_task_num  = 0;
+    SmartPi.serv_ID         += SmartPi.serv_ID_tmp;
+    SmartPi.cache_task_num   = 0;
     
     break;
 }
 
 // $ROOT$ -> Hardware
-case 0x00000001:{
+case ROOT_Hardware:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
-    SmartPi.serv_ID        = 0x00000001;
+    SmartPi.serv_ID        = ROOT_Hardware;
     SmartPi.serv_ID_tmp    = 1;
     SmartPi.numOfNextNodes = 5;
 
@@ -205,11 +208,11 @@ case 0x00000001:{
  * Next  进入下一业务
 =====================================================================*/
     if( SmartPi.serv_ID_tmp == 0 )
-        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     else{
         __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
-        SmartPi.serv_ID <<= 4;
-        SmartPi.serv_ID |= SmartPi.serv_ID_tmp;
+        // SmartPi.serv_ID <<= 4;
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Hardware_ + SmartPi.serv_ID_tmp);
     }
     
     SmartPi.cache_task_num    = 0;
@@ -218,11 +221,11 @@ case 0x00000001:{
 }
                
 // $ROOT$ -> Hardware -> NRF24L01
-case 0x00000011:{
+case ROOT_Hardware_NRF24L01:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
-    SmartPi.serv_ID        = 0x00000011;
+    SmartPi.serv_ID        = ROOT_Hardware_NRF24L01;
     SmartPi.serv_ID_tmp    = 1;
     SmartPi.numOfNextNodes = 5;
 
@@ -270,11 +273,11 @@ case 0x00000011:{
  * Next  进入下一业务
 =====================================================================*/
     if( SmartPi.serv_ID_tmp == 0 )
-        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     else{
         __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
-        SmartPi.serv_ID <<= 4;
-        SmartPi.serv_ID |= SmartPi.serv_ID_tmp;
+        // SmartPi.serv_ID <<= 4;
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Hardware_NRF24L01_ + SmartPi.serv_ID_tmp);
     }
     
     SmartPi.cache_task_num    = 0;
@@ -284,8 +287,8 @@ case 0x00000011:{
                 
 // $ROOT$ -> Hardware -> NRF24L01 -> RX Address
 // $ROOT$ -> Hardware -> NRF24L01 -> TX Address
-case 0x00000112:
-case 0x00000114:{
+case ROOT_Hardware_NRF24L01_RXAddress:
+case ROOT_Hardware_NRF24L01_TXAddress:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
@@ -307,7 +310,7 @@ case 0x00000114:{
         const char* text;
     }param;
     param.size = 5;
-    if( SmartPi.serv_ID==0x00000112 ){
+    if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RXAddress ){
         param.text = "RX Address:";
         memcpy( param.Addr, NRF24L01_RX_Addr, 5 );
     }else{
@@ -328,7 +331,7 @@ case 0x00000114:{
                                    pdTRUE,          // 等待所有指定的Bit
                                    portMAX_DELAY ); // 永久等待
    
-    if( SmartPi.serv_ID==0x00000112 ){
+    if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RXAddress ){
         memcpy( NRF24L01_RX_Addr, param.Addr, 5 );
     }else{
         memcpy( NRF24L01_TX_Addr, param.Addr, 5 );
@@ -346,7 +349,7 @@ case 0x00000114:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
     break;
@@ -354,11 +357,11 @@ case 0x00000114:{
                 
                 
 // $ROOT$ -> Hardware -> JoyStick
-case 0x00000012:{
+case ROOT_Hardware_JoyStick:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
-    SmartPi.serv_ID        = 0x00000012;
+    SmartPi.serv_ID        = ROOT_Hardware_JoyStick;
     SmartPi.serv_ID_tmp    = 0;
     SmartPi.numOfNextNodes = 0;
     taskENTER_CRITICAL();
@@ -393,7 +396,7 @@ case 0x00000012:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
@@ -401,11 +404,11 @@ case 0x00000012:{
 }
 
 // $ROOT$ -> Hardware -> LED
-case 0x00000013:{
+case ROOT_Hardware_LED:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
-    SmartPi.serv_ID        = 0x00000013;
+    SmartPi.serv_ID        = ROOT_Hardware_LED;
     SmartPi.serv_ID_tmp    = 0;
     SmartPi.numOfNextNodes = 0;
 
@@ -446,7 +449,7 @@ case 0x00000013:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
@@ -454,11 +457,11 @@ case 0x00000013:{
 }
                 
 // $ROOT$ -> Hardware -> BEEPER
-case 0x00000015:{
+case ROOT_Hardware_Beeper:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
-    SmartPi.serv_ID        = 0x00000015;
+    SmartPi.serv_ID        = ROOT_Hardware_Beeper;
     SmartPi.serv_ID_tmp    = 0;
     SmartPi.numOfNextNodes = 0;
 
@@ -497,7 +500,7 @@ case 0x00000015:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
@@ -530,7 +533,7 @@ default:{
     RH_FREE( SmartPi.cache_task_handle );
     taskEXIT_CRITICAL();
 
-    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     SmartPi.cache_task_num  = 0;
     
     break;
