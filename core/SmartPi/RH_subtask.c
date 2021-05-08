@@ -97,7 +97,7 @@ void __subtask_0x00000000_CTRL ( void* param ){
 
 /*====================================================================
  * Loop  子任务循环体
-=====================================================================*/       
+=====================================================================*/
     while( EXIT==false ){
         EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
         if( xResult&kHWEvent_JoySitck_Pressed ){
@@ -175,7 +175,7 @@ void __subtask_0x00000001_UI   ( void* param ){
 
 /*====================================================================
  * Loop  子任务循环体
-=====================================================================*/    
+=====================================================================*/
     while( EXIT == false ){
         xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down|kHWEvent_JoySitck_Pressed|kHWEvent_JoySitck_Left,
                                        pdFALSE,         // 清除该位
@@ -199,7 +199,7 @@ void __subtask_0x00000001_UI   ( void* param ){
 
 /*====================================================================
  * Exit  子任务退出工作
-=====================================================================*/        
+=====================================================================*/
     GUI_menu_delete( ID_Menu );
     GUI_RefreashEntireScreen();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
@@ -413,7 +413,7 @@ void __subtask_0x00000112_UI   ( void* param ){
     {
         __GUI_Object_t cfg = {0};
         
-        cfg.style       = kGUI_ObjStyle_num;
+        cfg.widget      = kGUI_ObjStyle_num;
         cfg.area.width  = 23;
         cfg.area.height = 12;
         cfg.area.xs     = (int)((RH_CFG_SCREEN_WIDTH - 5*cfg.area.width)>>1);
@@ -422,38 +422,38 @@ void __subtask_0x00000112_UI   ( void* param ){
         cfg.bk_color    = M_COLOR_BLACK;
         cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
         cfg.text_align  = kGUI_FontAlign_Middle;
-        cfg.text_color  = M_COLOR_WHITE;
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.text_size   = 8;
-        cfg.max[0]      = 255;
-        cfg.min[0]      = 0;
-        cfg.val[0]      = p->Addr[0];
+        // cfg.max[0]      = 255;
+        // cfg.min[0]      = 0;
+        // cfg.val[0]      = p->Addr[0];
         cfg.showFrame   = true;
         ID_Addr[0] = GUI_object_create( &cfg );
         
         cfg.showFrame  = false;
         cfg.area.xs   += cfg.area.width;
-        cfg.val[0]     = p->Addr[1];
+        // cfg.val[0]     = p->Addr[1];
         ID_Addr[1] = GUI_object_create( &cfg );
         
         cfg.area.xs   += cfg.area.width;
-        cfg.val[0]     = p->Addr[2];
+        // cfg.val[0]     = p->Addr[2];
         ID_Addr[2] = GUI_object_create( &cfg );
         
         cfg.area.xs   += cfg.area.width;
-        cfg.val[0]     = p->Addr[3];
+        // cfg.val[0]     = p->Addr[3];
         ID_Addr[3] = GUI_object_create( &cfg );
         
         cfg.area.xs   += cfg.area.width;
-        cfg.val[0]     = p->Addr[4];
+        // cfg.val[0]     = p->Addr[4];
         ID_Addr[4] = GUI_object_create( &cfg );
         
-        cfg.style      = kGUI_ObjStyle_text;
+        cfg.widget      = kGUI_ObjStyle_text;
         cfg.area.ys   -= cfg.area.height;
         cfg.area.xs    = 0;
         cfg.text       = p->text;
         cfg.area.width = strlen(cfg.text)*8;
         cfg.text_align  = kGUI_FontAlign_Left;
-        cfg.text_color  = M_COLOR_WHITE;
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.text_size   = 8;
         ID_Text         = GUI_object_create( &cfg );
     }
@@ -464,6 +464,19 @@ void __subtask_0x00000112_UI   ( void* param ){
     GUI_object_insert( ID_Addr[2] );
     GUI_object_insert( ID_Addr[3] );
     GUI_object_insert( ID_Addr[4] );
+
+    __GUI_ObjDataScr_num data = {0};
+
+    data.value = p->Addr[0];
+    GUI_object_adjust( ID_Addr[0], &data, sizeof(data) );
+    data.value = p->Addr[1];
+    GUI_object_adjust( ID_Addr[1], &data, sizeof(data) );
+    data.value = p->Addr[2];
+    GUI_object_adjust( ID_Addr[2], &data, sizeof(data) );
+    data.value = p->Addr[3];
+    GUI_object_adjust( ID_Addr[3], &data, sizeof(data) );
+    data.value = p->Addr[4];
+    GUI_object_adjust( ID_Addr[4], &data, sizeof(data) );
 
     GUI_RefreashEntireScreen();
     EventBits_t xResult;
@@ -491,8 +504,10 @@ void __subtask_0x00000112_UI   ( void* param ){
         }
         
         if( (xResult&kHWEvent_JoySitck_Up) || (xResult&kHWEvent_JoySitck_Down) ){
-            for( int i=0; i<p->size; i++ )
-                GUI_object_adjust( ID_Addr[i], p->Addr[i], 0 );
+            for( int i=0; i<p->size; i++ ){
+                __GUI_ObjDataScr_num data = { .value = p->Addr[i] };
+                GUI_object_adjust( ID_Addr[i], &data, sizeof(data) );
+            }
 
             xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up   );
             xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Down );
@@ -624,31 +639,29 @@ void __subtask_0x00000012_UI   ( void* param ){
     ID_t ID_Num_X, ID_Num_Y, ID_Text_X, ID_Text_Y = 0;
     {
         __GUI_Object_t cfg = {0};
-        GUI_object_quickSet(&cfg);
-        
-        cfg.style       = kGUI_ObjStyle_joystick;
+        GUI_object_template( &cfg, kGUI_ObjStyle_joystick );
         cfg.area.xs     = 10;
         cfg.area.ys     = 10;
         cfg.area.height = 45;
         cfg.area.width  = 45;
-        cfg.val[0]      = joystick_data[0];
-        cfg.val[1]      = joystick_data[1];
-        cfg.min[0]      = 0;
-        cfg.max[0]      = 4096;
-        cfg.min[1]      = 0;
-        cfg.max[1]      = 4096;
+        // cfg.val[0]      = joystick_data[0];
+        // cfg.val[1]      = joystick_data[1];
+        // cfg.min[0]      = 0;
+        // cfg.max[0]      = 4096;
+        // cfg.min[1]      = 0;
+        // cfg.max[1]      = 4096;
         cfg.showFrame   = true;
-        cfg.text_color  = M_COLOR_WHITE;
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.bk_color    = M_COLOR_BLACK;
         ID_JoyStick     = GUI_object_create( &cfg );
 
-        cfg.style       = kGUI_ObjStyle_num;
+        cfg.widget       = kGUI_ObjStyle_num;
         cfg.area.xs     = 90;
         cfg.area.ys     = 20;
         cfg.area.width  = 35;
         cfg.area.height = 12;
         cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
-        cfg.text_color  = M_COLOR_WHITE;
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.text_size   = 8;
         cfg.text_align  = kGUI_FontAlign_Middle;
         cfg.showFrame   = true;
@@ -657,7 +670,7 @@ void __subtask_0x00000012_UI   ( void* param ){
         cfg.area.ys    += cfg.area.height;
         ID_Num_Y        = GUI_object_create( &cfg );
         
-        cfg.style       = kGUI_ObjStyle_text;
+        cfg.widget       = kGUI_ObjStyle_text;
             
         cfg.area.width  = 10;
         cfg.area.xs    -= cfg.area.width-1;
@@ -683,10 +696,25 @@ void __subtask_0x00000012_UI   ( void* param ){
         if( xResult&kHWEvent_JoySitck_Pressed ){
             EXIT = true;
         }
+
+        // UI显示摇杆数据
+        __GUI_ObjDataScr_joystick objdata_joystick = {
+            .value    = { joystick_data[0], joystick_data[1] },
+            .max      = { 4096, 4096 },
+            .min      = {    0,    0 }
+        };
+        GUI_object_adjust(ID_JoyStick, &objdata_joystick, sizeof(objdata_joystick));
         
-        GUI_object_adjust(ID_JoyStick, joystick_data[0], joystick_data[1]);
-        GUI_object_adjust(ID_Num_X, joystick_data[0], 0);
-        GUI_object_adjust(ID_Num_Y, joystick_data[1], 0);
+        // UI显示X方向的ADC数据
+        __GUI_ObjDataScr_num   objdata_adc = {
+            .value = objdata_joystick.value[0]
+        };
+        GUI_object_adjust(ID_Num_X, &objdata_adc, sizeof(objdata_adc));
+
+        // UI显示Y方向的ADC数据
+        objdata_adc.value = objdata_joystick.value[1];
+        GUI_object_adjust(ID_Num_Y, &objdata_adc, sizeof(objdata_adc));
+
         GUI_RefreashScreen();
         
         vTaskDelay(10);
@@ -732,21 +760,19 @@ void __subtask_0x00000013_UI   ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_quickSet(&cfg);
+        GUI_object_template( &cfg, kGUI_ObjStyle_switch );
 
-        cfg.style       = kGUI_ObjStyle_switch;
         cfg.area.xs     = 72;
         cfg.area.ys     = 20;
         cfg.area.height = 12;
         cfg.area.width  = 30;
-        cfg.min[0]      = 0;
-        cfg.max[0]      = 256;
+        // cfg.min[0]      = 0;
+        // cfg.max[0]      = 256;
+        // cfg.val[0]      = 0;
         cfg.showFrame   = false;
-
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.bk_color    = M_COLOR_BLACK;
 
-        cfg.val[0]      = 0;
-    
         ID_Switch = GUI_object_create(&cfg);
     }
     
@@ -754,15 +780,14 @@ void __subtask_0x00000013_UI   ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_quickSet(&cfg);
+        GUI_object_template( &cfg, kGUI_ObjStyle_text );
 
-        cfg.style       = kGUI_ObjStyle_text;
         cfg.area.xs     = 20;
         cfg.area.ys     = 20;
         cfg.area.height = 12;
         cfg.area.width  = 40;
         cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
-        cfg.text_color  = M_COLOR_WHITE;
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.text        = "PC13";
         cfg.text_size   = 8;
         cfg.text_align  = kGUI_FontAlign_Left;
@@ -798,7 +823,11 @@ void __subtask_0x00000013_UI   ( void* param ){
         else if( xResult&kHWEvent_JoySitck_Left  )  { ans = 0; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left  ); }
         
         taskENTER_CRITICAL();
-        GUI_object_adjust( ID_Switch, ans, 0 );
+
+        __GUI_ObjDataScr_switch objdata_switch = {
+            .cmd = (bool)ans
+        };
+        GUI_object_adjust( ID_Switch, &objdata_switch, sizeof(objdata_switch) );
         GUI_RefreashScreen();
         taskEXIT_CRITICAL();
     }
@@ -872,20 +901,15 @@ void __subtask_0x00000015_UI   ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_quickSet(&cfg);
-
-        cfg.style       = kGUI_ObjStyle_switch;
+        GUI_object_template( &cfg, kGUI_ObjStyle_switch );
         cfg.area.xs     = 72;
         cfg.area.ys     = 20;
         cfg.area.height = 12;
         cfg.area.width  = 30;
-        cfg.min[0]      = 0;
-        cfg.max[0]      = 256;
         cfg.showFrame   = false;
-
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.bk_color    = M_COLOR_BLACK;
 
-        cfg.val[0]      = 0;
     
         ID_Switch = GUI_object_create(&cfg);
     }
@@ -894,15 +918,14 @@ void __subtask_0x00000015_UI   ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_quickSet(&cfg);
+        GUI_object_template( &cfg, kGUI_ObjStyle_text );
 
-        cfg.style       = kGUI_ObjStyle_text;
         cfg.area.xs     = 20;
         cfg.area.ys     = 20;
         cfg.area.height = 12;
         cfg.area.width  = 40;
         cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
-        cfg.text_color  = M_COLOR_WHITE;
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.text        = "BEEPER";
         cfg.text_size   = 8;
         cfg.text_align  = kGUI_FontAlign_Left;
@@ -938,7 +961,12 @@ void __subtask_0x00000015_UI   ( void* param ){
         else if( xResult&kHWEvent_JoySitck_Left  )  { ans = 0; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left  ); }
         
         taskENTER_CRITICAL();
-        GUI_object_adjust( ID_Switch, ans, 0 );
+
+
+        __GUI_ObjDataScr_switch objdata_switch = {
+            .cmd = (bool)ans
+        };
+        GUI_object_adjust( ID_Switch, &objdata_switch, sizeof(objdata_switch) );
         GUI_RefreashScreen();
         taskEXIT_CRITICAL();
     }
@@ -1005,15 +1033,13 @@ void __subtask_default_UI      ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_quickSet(&cfg);
-
-        cfg.style       = kGUI_ObjStyle_text;
+        GUI_object_template( &cfg, kGUI_ObjStyle_text );
         cfg.area.xs     = 30;
         cfg.area.ys     = 30;
         cfg.area.height = 12;
         cfg.area.width  = 70;
         cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
-        cfg.text_color  = M_COLOR_WHITE;
+        cfg.obj_color   = M_COLOR_WHITE;
         cfg.text        = "No preview.";
         cfg.text_size   = 8;
         cfg.text_align  = kGUI_FontAlign_Left;
