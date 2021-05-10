@@ -17,8 +17,8 @@
 /*==============================
  * GUI headfiles
 ===============================*/
-#include "RH_gui_api.h"
-#include "RH_gui.h"
+#include "GLU_api.h"
+#include "GLU_glucoo.h"
 #include "RH_color.h"
 
 /*==============================
