@@ -9,10 +9,13 @@
 
 #include "BLK_data.h"
 
+#include "../game/manila.h"
+
 typedef enum{
     ROOT                              , //  /
-
     ROOT_Hardware                     , //  //
+    ROOT_Game                         , //  //
+    ROOT_About                        , //  //
     
     ROOT_Hardware_                    , //  ---
     ROOT_Hardware_NRF24L01            , //  ///
@@ -27,6 +30,18 @@ typedef enum{
     ROOT_Hardware_NRF24L01_TXMode     , //  ////
     ROOT_Hardware_NRF24L01_TXAddress  , //  ////
     ROOT_Hardware_NRF24L01_ACK        , //  ////
+    
+    ROOT_Game_                        , //  ---
+    ROOT_Game_Manila                  , //  ///
+
+    ROOT_Game_Manila_                 , //  ----
+    ROOT_Game_Manila_ShipDiagram      , //  ////
+    ROOT_Game_Manila_ArrivedA         , //  ////
+    ROOT_Game_Manila_ArrivedB         , //  ////
+    ROOT_Game_Manila_ArrivedC         , //  ////
+    ROOT_Game_Manila_DrownA           , //  ////
+    ROOT_Game_Manila_DrownB           , //  ////
+    ROOT_Game_Manila_DrownC           , //  ////
 
 }E_TaskID_t;
 
@@ -42,6 +57,8 @@ struct __SmartPiService_t{
     
     int8_t            cache_task_num;    
     TaskHandle_t*     cache_task_handle;
+    
+    void              (*deleteSubtask)(void);
 };
 typedef struct __SmartPiService_t __SmartPiService_t;
 extern __SmartPiService_t SmartPi;
@@ -69,6 +86,8 @@ typedef enum{
     kSWEvent_StateChanged      = (1<<0),   // 0 
     kSWEvent_UI_Finished       = (1<<1),   // 1
     kSWEvent_CTRL_Finished     = (1<<2),   // 2
+    kSWEvent_ParentTaskCall    = (1<<3),   // 3
+    kSWEvent_ChildTaskCall     = (1<<4),   // 4
 
 }E_SWEvent_t;
 

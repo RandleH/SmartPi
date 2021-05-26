@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_FULL_ASSERT</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\CMSIS\CM3\DeviceSupport\startup\arm;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\USER\inc;..\Libraries\CMSIS\CM3\DeviceSupport;..\Libraries\Device;..\BSP;..\..\core;..\..\core\BlackHouse;..\..\core\STB;..\..\core\SmartPi;..\self;..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\freeRTOS\include;..\Libraries\freeRTOS\config;..\Libraries\freeRTOS\portable\RVDS\ARM_CM3;..\..\core\Glucoo;..\..\core\Glucoo\draw;..\..\core\Glucoo\menu;..\..\core\Glucoo\window;..\..\core\Glucoo\font;..\..\core\Glucoo\object</IncludePath>
+              <IncludePath>..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\CMSIS\CM3\DeviceSupport\startup\arm;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\USER\inc;..\Libraries\CMSIS\CM3\DeviceSupport;..\Libraries\Device;..\BSP;..\..\core;..\..\core\BlackHouse;..\..\core\STB;..\..\core\SmartPi;..\self;..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\freeRTOS\include;..\Libraries\freeRTOS\config;..\Libraries\freeRTOS\portable\RVDS\ARM_CM3;..\..\core\Glucoo;..\..\core\Glucoo\draw;..\..\core\Glucoo\menu;..\..\core\Glucoo\window;..\..\core\Glucoo\font;..\..\core\Glucoo\object;..\..\core\SmartPi\project\game</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -840,6 +840,16 @@
               <FileName>BLK_utility.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\core\BlackHouse\BLK_utility.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>SmartPi proj</GroupName>
+          <Files>
+            <File>
+              <FileName>manila.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\core\SmartPi\project\game\manila.c</FilePath>
             </File>
           </Files>
         </Group>

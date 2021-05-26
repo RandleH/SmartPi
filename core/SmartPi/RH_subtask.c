@@ -13,10 +13,14 @@
 
 #undef RH_DEBUG
 
-// $ROOT$
-void __subtask_0x00000000_UI   ( void* param ){
+#ifdef MAKE_TASK
+#undef MAKE_TASK
+#endif
+#define MAKE_TASK( CLASS, ID, TYPE ) __##CLASS##_##ID##_##TYPE
+
+void MAKE_TASK( subtask, ROOT, UI   ) ( void* param ){
 #ifdef RH_DEBUG	
-	RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000000 );
+	RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT );
 #endif
 
 /*====================================================================
@@ -30,7 +34,7 @@ void __subtask_0x00000000_UI   ( void* param ){
         cfg.area.ys = 0;
         cfg.area.height = RH_CFG_SCREEN_HEIGHT -1;
         cfg.area.width  = RH_CFG_SCREEN_WIDTH  -1;
-        cfg.nItem = 2;
+        cfg.nItem = SmartPi.numOfNextNodes;
         cfg.title = "SmartPi";
         cfg.color_title = M_COLOR_WHITE;
         cfg.size  = 10;
@@ -39,9 +43,10 @@ void __subtask_0x00000000_UI   ( void* param ){
         cfg.sl_color    = M_COLOR_WHITE;
         cfg.text_color  = M_COLOR_WHITE;
 
-        __GUI_MenuParam_t m[2] = {0};
+        __GUI_MenuParam_t *m = alloca( cfg.nItem*sizeof(__GUI_MenuParam_t) );
         m[0].text = "Hardware";
-        m[1].text = "About";
+        m[1].text = "Game";
+        m[2].text = "About";
         cfg.menuList = m;
     
         ID_Menu = GUI_menu_create(&cfg);
@@ -53,7 +58,7 @@ void __subtask_0x00000000_UI   ( void* param ){
 
 /*====================================================================
  * Loop  子任务循环体
-=====================================================================*/    
+=====================================================================*/
 	while( EXIT == false ){
         xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down|kHWEvent_JoySitck_Pressed,
                                        pdFALSE,         // 清除该位
@@ -77,7 +82,7 @@ void __subtask_0x00000000_UI   ( void* param ){
 
 /*====================================================================
  * Exit  子任务退出工作
-=====================================================================*/        
+=====================================================================*/
     GUI_menu_delete( ID_Menu );
     GUI_RefreashEntireScreen();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
@@ -85,14 +90,14 @@ void __subtask_0x00000000_UI   ( void* param ){
 
     while(1); 
 }
-void __subtask_0x00000000_CTRL ( void* param ){
+void MAKE_TASK( subtask, ROOT, CTRL ) ( void* param ){
 #ifdef RH_DEBUG 
-    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000000 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT );
 #endif
 
 /*====================================================================
  * Init  子任务参数初始化
-=====================================================================*/    
+=====================================================================*/
     bool EXIT = false;
 
 /*====================================================================
@@ -128,13 +133,12 @@ void __subtask_0x00000000_CTRL ( void* param ){
 
 /*====================================================================
  * Exit  子任务退出工作
-=====================================================================*/     
+=====================================================================*/
     xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
     while(1);  
 }
 
-// $ROOT$ -> Hardware
-void __subtask_0x00000001_UI   ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware, UI   ) ( void* param ){
 /*====================================================================
  * Init  子任务参数初始化
 =====================================================================*/
@@ -207,7 +211,7 @@ void __subtask_0x00000001_UI   ( void* param ){
 
     while(1); 
 }
-void __subtask_0x00000001_CTRL ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
     RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000001 );
 #endif
@@ -261,10 +265,132 @@ void __subtask_0x00000001_CTRL ( void* param ){
     while(1);
 }
 
-// $ROOT$ -> Hardware -> NRF24L01
-void __subtask_0x00000011_UI   ( void* param ){
+void MAKE_TASK( subtask, ROOT_Game, UI   ) ( void* param ){
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+    ID_t ID_Menu = 0;
+
+    __GUI_MenuParam_t* m = alloca( sizeof(__GUI_MenuParam_t)*SmartPi.numOfNextNodes );
+    m[0].text = "Manila";
+    {
+        __GUI_Menu_t cfg = {0};
+        cfg.area.xs = 0;
+        cfg.area.ys = 0;
+        cfg.area.height = RH_CFG_SCREEN_HEIGHT -1;
+        cfg.area.width  = RH_CFG_SCREEN_WIDTH  -1;
+        cfg.nItem       = SmartPi.numOfNextNodes;
+        cfg.title       = "Game";
+        cfg.color_title = M_COLOR_WHITE;
+        cfg.size  = 10;
+        
+        cfg.bk_color    = M_COLOR_BLACK;
+        cfg.sl_color    = M_COLOR_WHITE;
+        cfg.text_color  = M_COLOR_WHITE;
+
+        cfg.menuList    = m;
+    
+        ID_Menu = GUI_menu_create(&cfg);
+    }
+    GUI_menu_frame  ( ID_Menu, 0 );
+    GUI_menu_insert ( ID_Menu );
+    GUI_RefreashEntireScreen();
+    EventBits_t xResult;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down|kHWEvent_JoySitck_Pressed|kHWEvent_JoySitck_Left,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        if( (xResult&kHWEvent_JoySitck_Pressed) || (xResult&kHWEvent_JoySitck_Left) ){
+            EXIT = true;
+        }
+
+
+        int ans = 0;
+        if     ( xResult&kHWEvent_JoySitck_Up   )  { ans = -1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up   ); }
+        else if( xResult&kHWEvent_JoySitck_Down )  { ans =  1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Down ); }
+        else                                       ans =  0;
+        
+        taskENTER_CRITICAL();
+        GUI_menu_scroll( ID_Menu, ans );
+        GUI_RefreashEntireScreen();
+        taskEXIT_CRITICAL();
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    GUI_menu_delete( ID_Menu );
+    GUI_RefreashEntireScreen();
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
+    //...//
+
+    while(1);
+}
+void MAKE_TASK( subtask, ROOT_Game, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( SmartPi.serv_ID == 0x00000011 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Game );
+#endif
+
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT==false ){
+        EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+
+        if( joystick_data[1] > 4000 ){
+            if( SmartPi.serv_ID_tmp > 1 )
+                SmartPi.serv_ID_tmp--;
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+        }else if( joystick_data[1] < 100 ){
+            if( SmartPi.serv_ID_tmp < SmartPi.numOfNextNodes )
+            SmartPi.serv_ID_tmp++;
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+        }
+
+        if( joystick_data[0] > M_JOYSTICK_THREASHOLD_RIGHT ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+        }else if( joystick_data[0] < M_JOYSTICK_THREASHOLD_LEFT && joystick_data[1] < M_JOYSTICK_THREASHOLD_UP ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+        }
+        
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+        }
+        
+        if( xResult&kHWEvent_JoySitck_Left ){
+            SmartPi.serv_ID_tmp = 0;
+            EXIT = true;
+        }
+        vTaskDelay(10);
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);
+}
+    
+
+
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01 );
 #endif
 
 /*====================================================================
@@ -336,9 +462,9 @@ void __subtask_0x00000011_UI   ( void* param ){
 
     while(1);
 }
-void __subtask_0x00000011_CTRL ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( SmartPi.serv_ID == 0x00000011 );
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01 );
 #endif
 
 /*====================================================================
@@ -390,9 +516,7 @@ void __subtask_0x00000011_CTRL ( void* param ){
     while(1);
 }
 
-// $ROOT$ -> Hardware -> NRF24L01 -> RX Address
-// $ROOT$ -> Hardware -> NRF24L01 -> TX Address
-void __subtask_0x00000112_UI   ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param ){
 #ifdef RH_DEBUG
     RH_ASSERT( SmartPi.serv_ID == 0x00000112 || SmartPi.serv_ID == 0x00000114 );
 #endif
@@ -533,9 +657,9 @@ void __subtask_0x00000112_UI   ( void* param ){
 
     while(1);
 }
-void __subtask_0x00000112_CTRL ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( SmartPi.serv_ID == 0x00000112 || SmartPi.serv_ID == 0x00000114 );
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RXAddress || SmartPi.serv_ID == ROOT_Hardware_NRF24L01_TXAddress );
 #endif
 
 /*====================================================================
@@ -626,10 +750,9 @@ void __subtask_0x00000112_CTRL ( void* param ){
     while(1);
 }
 
-// $ROOT$ -> Hardware -> JoyStick
-void __subtask_0x00000012_UI   ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000012 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_JoyStick );
 #endif
 /*====================================================================
  * Init  子任务参数初始化
@@ -728,9 +851,9 @@ void __subtask_0x00000012_UI   ( void* param ){
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     while(1);
 }
-void __subtask_0x00000012_CTRL ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000012 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_JoyStick );
 #endif
 /*====================================================================
  * Init  子任务参数初始化
@@ -743,10 +866,9 @@ void __subtask_0x00000012_CTRL ( void* param ){
     while(1);
 }
 
-// $ROOT$ -> Hardware -> LED
-void __subtask_0x00000013_UI   ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000013 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_LED );
 #endif
 /*====================================================================
  * Init  子任务参数初始化
@@ -842,9 +964,9 @@ void __subtask_0x00000013_UI   ( void* param ){
 
     while(1);
 }
-void __subtask_0x00000013_CTRL ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_LED, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000013 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_LED );
 #endif
 
 /*====================================================================
@@ -884,10 +1006,9 @@ void __subtask_0x00000013_CTRL ( void* param ){
     while(1);
 }
 
-// $ROOT$ -> Hardware -> BEEPER
-void __subtask_0x00000015_UI   ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000015 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_Beeper );
 #endif
 /*====================================================================
  * Init  子任务参数初始化
@@ -981,9 +1102,9 @@ void __subtask_0x00000015_UI   ( void* param ){
 
     while(1);
 }
-void __subtask_0x00000015_CTRL ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_Beeper, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == 0x00000015 );
+    RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_Beeper );
 #endif
 
 /*====================================================================
@@ -1022,8 +1143,505 @@ void __subtask_0x00000015_CTRL ( void* param ){
     xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
     while(1);
 }
-// $DEFAULT$
-void __subtask_default_UI      ( void* param ){
+
+void MAKE_TASK( subtask, ROOT_Game_Manila, UI   ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Game_Manila );
+#endif
+    
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    const char* menu_name[] = {
+        "ShipDiagram" ,
+        "Arrived A"   ,
+        "Arrived B"   ,
+        "Arrived C"   ,
+        "Drown A"     ,
+        "Drown B"     ,
+        "Drown C"     ,
+        "Pirate"
+    };
+    bool EXIT = false;
+    ID_t ID_Menu = 0;
+    {
+        __GUI_Menu_t cfg = {0};
+        cfg.area.xs = 0;
+        cfg.area.ys = 0;
+        cfg.area.height = RH_CFG_SCREEN_HEIGHT -1;
+        cfg.area.width  = RH_CFG_SCREEN_WIDTH  -1;
+        cfg.nItem = sizeof(menu_name)/sizeof(const char*);
+        cfg.title = "Manila";
+        cfg.color_title = M_COLOR_WHITE;
+        cfg.size  = 10;
+        
+        cfg.bk_color    = M_COLOR_BLACK;
+        cfg.sl_color    = M_COLOR_WHITE;
+        cfg.text_color  = M_COLOR_WHITE;
+
+        __GUI_MenuParam_t *m = alloca(sizeof(__GUI_MenuParam_t)*cfg.nItem);
+        for( int8_t i=0; i<cfg.nItem; i++){
+            m[i].text = menu_name[i];
+        }
+        cfg.menuList = m;
+    
+        ID_Menu = GUI_menu_create(&cfg);
+    }
+    GUI_menu_frame  ( ID_Menu, 0 );
+    GUI_menu_insert ( ID_Menu );
+    GUI_RefreashEntireScreen();
+    EventBits_t xResult;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down|kHWEvent_JoySitck_Pressed|kHWEvent_JoySitck_Left,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        if( (xResult&kHWEvent_JoySitck_Left) || (xResult&kHWEvent_JoySitck_Pressed) ){
+            EXIT = true;
+        }
+
+
+        int ans = 0;
+        if     ( xResult&kHWEvent_JoySitck_Up   )  { ans = -1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up   ); }
+        else if( xResult&kHWEvent_JoySitck_Down )  { ans =  1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Down ); }
+        else                                       ans =  0;
+        
+        taskENTER_CRITICAL();
+        GUI_menu_scroll( ID_Menu, ans );
+        GUI_RefreashEntireScreen();
+        taskEXIT_CRITICAL();
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    GUI_menu_delete( ID_Menu );
+    GUI_RefreashEntireScreen();
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
+    //...//
+
+    while(1);
+
+}
+void MAKE_TASK( subtask, ROOT_Game_Manila, CTRL ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Game_Manila );
+#endif
+
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left    |
+                                             kHWEvent_JoySitck_Right   |
+                                             kHWEvent_JoySitck_Down    |
+                                             kHWEvent_JoySitck_Up      |
+                                             kHWEvent_JoySitck_Pressed );
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT==false ){
+        EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+
+        if( joystick_data[1] > 4000 ){
+            if( SmartPi.serv_ID_tmp > 1 )
+                SmartPi.serv_ID_tmp--;
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+        }else if( joystick_data[1] < 100 ){
+            if( SmartPi.serv_ID_tmp < SmartPi.numOfNextNodes )
+                SmartPi.serv_ID_tmp++;
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+        }
+
+        if( joystick_data[0] > M_JOYSTICK_THREASHOLD_RIGHT ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+        }else if( joystick_data[0] < M_JOYSTICK_THREASHOLD_LEFT  && joystick_data[1] < M_JOYSTICK_THREASHOLD_UP ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+        }
+        
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+        }
+        
+        if( xResult&kHWEvent_JoySitck_Left ){
+            SmartPi.serv_ID_tmp = 0;
+            EXIT = true;
+        }
+        vTaskDelay(10);
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);
+}
+
+void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/  
+    struct{
+        int8_t idx;
+        struct {
+            int8_t pos;
+            int8_t shipment;
+        }boat_info[3];
+        int8_t round;
+    }*cache = param;
+    bool EXIT = false;  
+    const char* pStrs[] = {
+        [ M_MANILA_SHIPMENT_JADE    ] = "Jd" , // Jade
+        [ M_MANILA_SHIPMENT_NUTMEG  ] = "Gs" , // Ginseng
+        [ M_MANILA_SHIPMENT_SILK    ] = "Sl" , // Silk
+        [ M_MANILA_SHIPMENT_GINSENG ] = "Ng"   // Nutmeg
+    };
+
+    ID_t ID_Objects[ ] = {
+        [0] = 0, // BoatStatus A
+        [1] = 0, // BoatStatus B
+        [2] = 0, // BoatStatus C
+        [3] = 0, // DiceRound 
+        [4] = 0, // ShipmentName A
+        [5] = 0, // ShipmentName B
+        [6] = 0, // ShipmentName C
+        [7] = 0, // DiceRound_text
+    };
+    
+    // ID_t ID_BoatStatus[3] = {0};
+    // ID_t ID_CargoName[3]  = {0};
+    // ID_t ID_DiceRound_txt = 0;
+    // ID_t ID_DiceRound_num = 0;
+    __GUI_Object_t cfg = {0};
+
+    GUI_object_template( &cfg, kGUI_ObjStyle_trunk );
+    cfg.obj_color  = M_COLOR_WHITE;
+    cfg.area.xs    = 10;
+    cfg.area.ys    = 3;
+    cfg.area.width = 14;
+    
+    ID_Objects[0] = GUI_object_create( &cfg );
+    cfg.area.xs  += cfg.area.width+2;
+    ID_Objects[1] = GUI_object_create( &cfg );
+    cfg.area.xs  += cfg.area.width+2;
+    ID_Objects[2] = GUI_object_create( &cfg );
+    
+    GUI_object_insert( ID_Objects[0] );
+    GUI_object_insert( ID_Objects[1] );
+    GUI_object_insert( ID_Objects[2] );
+    {
+        __GUI_ObjDataScr_trunk data = {
+            .min   = 0,
+            .max   = 14,
+            .value = cache->boat_info[0].pos 
+        };
+        GUI_object_adjust( ID_Objects[0], &data, sizeof(data));
+        
+        data.value = cache->boat_info[1].pos; 
+        GUI_object_adjust( ID_Objects[1], &data, sizeof(data));
+
+        data.value = cache->boat_info[2].pos;
+        GUI_object_adjust( ID_Objects[2], &data, sizeof(data));
+    }
+
+    GUI_set_penColor(M_COLOR_WHITE);
+    GUI_line_raw(67, 7, 67, 57);
+
+    GUI_object_template(&cfg, kGUI_ObjStyle_text);
+    cfg.area.xs     = 10;
+    cfg.area.ys     = 52;
+    cfg.area.height = 12;
+    cfg.area.width  = 14;
+    cfg.text        = pStrs[ cache->boat_info[ 0 ].shipment ];
+    cfg.showFrame   = false;
+    cfg.obj_color   = M_COLOR_WHITE;
+    ID_Objects[4] = GUI_object_create( &cfg );
+
+    cfg.text = pStrs[ cache->boat_info[ 1 ].shipment ];
+    cfg.area.xs += cfg.area.width +2;
+    ID_Objects[5] = GUI_object_create( &cfg );
+
+    cfg.text = pStrs[ cache->boat_info[ 2 ].shipment ];
+    cfg.area.xs += cfg.area.width +2;
+    ID_Objects[6] = GUI_object_create( &cfg );
+    GUI_object_insert( ID_Objects[4] );
+    GUI_object_insert( ID_Objects[5] );
+    GUI_object_insert( ID_Objects[6] );
+
+    GUI_object_frame(  ID_Objects[0], true);
+    
+    cfg.text         = "Round:";
+    cfg.area.xs      = 73;
+    cfg.area.ys      = 20;
+    cfg.area.height  = 11;
+    cfg.area.width   = strlen(cfg.text)*6+2;
+    cfg.showFrame    = false;
+    ID_Objects[7]    = GUI_object_create( &cfg );
+    
+    cfg.widget       = kGUI_ObjStyle_num;
+    cfg.area.xs     += cfg.area.width;
+    cfg.area.width   = 7;
+    ID_Objects[3]    = GUI_object_create( &cfg );
+    
+    
+    GUI_object_insert( ID_Objects[7] );
+    GUI_object_insert( ID_Objects[3] );
+    {
+        __GUI_ObjDataScr_num data = {
+            .value = cache->round
+        };
+        GUI_object_adjust( ID_Objects[3], &data, sizeof(data) );
+    }
+    
+    GUI_RefreashEntireScreen();
+
+
+    EventBits_t xResult;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        typeof( cache->idx ) idx = cache->idx;
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Right  |
+                                                          kHWEvent_JoySitck_Pressed|
+                                                          kHWEvent_JoySitck_Left   |
+                                                          kHWEvent_JoySitck_Up     |
+                                                          kHWEvent_JoySitck_Down   ,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+        }
+
+        if( idx != cache->idx ){
+            GUI_object_frame( ID_Objects[ idx        ], false );
+            GUI_object_frame( ID_Objects[ cache->idx ], true  );            
+            idx = cache->idx;
+        }
+ 
+        switch( cache->idx ){
+        case 0:  // Boat A
+        case 1:  // Boat B
+        case 2:{ // Boat C
+            __GUI_ObjDataScr_trunk data = {
+                .value = cache->boat_info[ cache->idx ].pos,  
+                .max   = M_MANILA_BOATPOS_MAX,
+                .min   = 0,
+            };
+            GUI_object_adjust( ID_Objects[ cache->idx ], &data, sizeof(data) );
+            break; 
+        }
+        case 3:{ // Round
+            __GUI_ObjDataScr_num data = {
+                .value = cache->round
+            };
+            GUI_object_adjust( ID_Objects[ cache->idx ], &data, sizeof(data) );
+            break;
+        }
+        case 4: // Name A
+        case 5: // Name B
+        case 6:{// Name C
+            __GUI_ObjDataScr_text data = {
+                .text = pStrs[ cache->boat_info[ cache->idx-4 ].shipment ]
+            };
+            GUI_object_adjust( ID_Objects[ cache->idx ], &data, sizeof(data) );
+            break;  
+        }          
+        
+        }
+        xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right  |
+                                                  kHWEvent_JoySitck_Left   |
+                                                  kHWEvent_JoySitck_Up     |
+                                                  kHWEvent_JoySitck_Down    );
+        taskENTER_CRITICAL();
+
+        GUI_RefreashScreen();
+        taskEXIT_CRITICAL();
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    {
+        int8_t cnt = sizeof(ID_Objects)/sizeof(*ID_Objects);
+        while(cnt--)
+            GUI_object_delete( ID_Objects[cnt] );
+    }
+    
+    
+    GUI_set_penColor( M_COLOR_BLACK);
+    GUI_line_raw(67, 7, 67, 57);
+    GUI_RefreashEntireScreen();
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
+    //...//
+
+    while(1);
+}
+void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, CTRL ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Game_Manila );
+#endif
+
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    const int8_t obj_num = 7;
+    bool EXIT = false;
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left    |
+                                             kHWEvent_JoySitck_Right   |
+                                             kHWEvent_JoySitck_Down    |
+                                             kHWEvent_JoySitck_Up      |
+                                             kHWEvent_JoySitck_Pressed );
+    // 导入缓存数据, 需与父任务同步
+    struct{
+        int8_t idx;
+        struct {
+            int8_t pos;
+            int8_t shipment;
+        }boat_info[3];
+        int8_t round;
+    }*cache = param;
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT==false ){
+        EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+
+        // X方向 改变写入参数的类型种类
+        // Y方向 改变写入参数的数据
+        // 因此必须先判断X方向数据, 再判断Y方向, 先确定好选择何种类型, 再确定该种参数调节至多少
+
+        if( joystick_data[0] > M_JOYSTICK_THREASHOLD_RIGHT ){
+            if( cache->idx < obj_num-1 )
+                cache->idx++;
+            else
+                cache->idx = 0;
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            vTaskDelay(100);
+        }else if( joystick_data[0] < M_JOYSTICK_THREASHOLD_LEFT ){
+            if( cache->idx > 0 )
+                cache->idx--;
+            else{
+                cache->idx = obj_num-1;
+            }
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+            vTaskDelay(100);
+        }
+
+        if( joystick_data[1] > M_JOYSTICK_THREASHOLD_UP ){
+            switch( cache->idx ){
+                case 0: // Boat A
+                case 1: // Boat B
+                case 2: // Boat C
+                    if( cache->boat_info[ cache->idx ].pos < M_MANILA_BOATPOS_MAX )
+                        cache->boat_info[ cache->idx ].pos++;
+                    // SMP_Proj_Manila_setboatpos( cache->boat_info[ cache->idx ].shipment, cache->boat_info[ cache->idx ].pos );
+                    vTaskDelay(20);
+                    break;
+
+                case 3: // Round
+                    if( cache->round < M_MANILA_ROUND_MAX )
+                        cache->round++;
+                    SMP_Proj_Manila_round( cache->round );
+                    vTaskDelay(120);
+                    break;
+                case 4: // Name A
+                case 5: // Name B
+                case 6: // Name C
+                    // 将弃用的运输货品与当前调换
+                    __swap( cache->boat_info[ cache->idx-4 ].shipment, Manila->shipment_depricated );
+                    // 更新到 Manila
+                    Manila->boat[ cache->idx-4 ].shipment = cache->boat_info[ cache->idx-4 ].shipment;
+                    vTaskDelay(120);
+                    break;            
+            }
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+            
+        }else if( joystick_data[1] < M_JOYSTICK_THREASHOLD_DOWN ){
+            switch( cache->idx ){
+                case 0: // Boat A
+                case 1: // Boat B
+                case 2: // Boat C
+                    if( cache->boat_info[ cache->idx ].pos > 0 )
+                        cache->boat_info[ cache->idx ].pos--;
+                    // SMP_Proj_Manila_setboatpos( cache->boat_info[ cache->idx ].shipment, cache->boat_info[ cache->idx ].pos );
+                    vTaskDelay(20);
+                    break; 
+                case 3: // Round
+                    if( cache->round > M_MANILA_ROUND_MIN )
+                        cache->round--;
+                    SMP_Proj_Manila_round( cache->round );
+                    vTaskDelay(120);
+                    break;
+                case 4: // Name A 
+                case 5: // Name B  
+                case 6: // Name C
+                    // 将弃用的运输货品与当前调换
+                    __swap( cache->boat_info[ cache->idx-4 ].shipment, Manila->shipment_depricated );
+                    // 更新到 Manila
+                    Manila->boat[ cache->idx-4 ].shipment = cache->boat_info[ cache->idx-4 ].shipment;
+                    vTaskDelay(120);
+                    break;            
+            }
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+            vTaskDelay(20);
+        }
+
+        
+        
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            for( int8_t i=0; i<3; i++ ){
+                // switch( cache->boat_info[ i ].shipment ){
+                //     case M_MANILA_SHIPMENT_JADE:
+                //         Manila->boatpos_Jade = cache->boat_info[ i ].pos;
+                //         break;
+                //     case M_MANILA_SHIPMENT_SILK:
+                //         Manila->boatpos_Silk = cache->boat_info[ i ].pos;
+                //         break;
+                //     case M_MANILA_SHIPMENT_NUTMEG:
+                //         Manila->boatpos_Nutmeg = cache->boat_info[ i ].pos;
+                //         break;
+                //     case M_MANILA_SHIPMENT_GINSENG:
+                //         Manila->boatpos_Ginseng = cache->boat_info[ i ].pos;
+                //         break;
+                //     default:
+                //         break;
+                // }
+
+                Manila->boat[i].pos = cache->boat_info[i].pos;
+            }
+            Manila->dice_round = cache->round;
+            //...//
+            SmartPi.serv_ID_tmp = 0;
+            EXIT = true;
+        }
+        
+        
+        vTaskDelay(10);
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);
+}
+
+void MAKE_TASK( subtask, default   , UI   )    ( void* param ){
 /*====================================================================
  * Init  子任务参数初始化
 =====================================================================*/
@@ -1080,7 +1698,7 @@ void __subtask_default_UI      ( void* param ){
 
     while(1);
 }
-void __subtask_default_CTRL    ( void* param ){
+void MAKE_TASK( subtask, default   , CTRL )    ( void* param ){
 /*====================================================================
  * Init  子任务参数初始化
 =====================================================================*/

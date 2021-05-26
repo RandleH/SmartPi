@@ -8,6 +8,17 @@
 #include "nrf24l01.h"
 
 /*====================================================================
+ * SmartPi类内方法
+=====================================================================*/
+static inline void this_deleteSubtask(void){
+    for( int i=0; i<SmartPi.cache_task_num; i++ ){
+        vTaskDelete( SmartPi.cache_task_handle[i] );
+    }
+    SmartPi.cache_task_num    = 0;
+    SmartPi.cache_task_handle = NULL;
+}
+
+/*====================================================================
  * 静态事件句柄和事件组汇总
 =====================================================================*/
 StaticEventGroup_t EG_Hardware          = {0};
@@ -25,7 +36,7 @@ TaskHandle_t       THandle_radio_check  = NULL;
 /*====================================================================
  * SmartPi 业务结构体
 =====================================================================*/
-__SmartPiService_t SmartPi           = {.serv_ID = ROOT};
+__SmartPiService_t SmartPi           = {.serv_ID = ROOT, .deleteSubtask = this_deleteSubtask};
 
 /*====================================================================
  * FreeRTOS事件配置
@@ -73,26 +84,35 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer, Stac
 #endif
 #define MAKE_TASK( CLASS, ID, TYPE ) __##CLASS##_##ID##_##TYPE
 
-extern void MAKE_TASK( subtask, 0x00000000, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, 0x00000000, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, 0x00000001, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, 0x00000001, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, 0x00000011, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, 0x00000011, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Game, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Game, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, 0x00000112, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, 0x00000112, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, 0x00000012, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, 0x00000012, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, 0x00000013, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, 0x00000013, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, 0x00000015, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, 0x00000015, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_LED, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param );
+
+extern void MAKE_TASK( subtask, ROOT_Hardware_Beeper, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param );
+
+extern void MAKE_TASK( subtask, ROOT_Game_Manila, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Game_Manila, UI   ) ( void* param );
+
+extern void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param );
 
 extern void MAKE_TASK( subtask, default   , CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, default   , UI   ) ( void* param );
@@ -100,6 +120,19 @@ extern void MAKE_TASK( subtask, default   , UI   ) ( void* param );
 /*====================================================================
  * SmartPi 主任务
 =====================================================================*/
+#define I_AM_CHILD      do{ \
+                            xEventGroupSetBits  ( EGHandle_Software, kSWEvent_ChildTaskCall  );\
+                            xEventGroupClearBits( EGHandle_Software, kSWEvent_ParentTaskCall );\
+                        } while(0)
+
+#define I_AM_PARENT     do{ \
+                            xEventGroupSetBits  ( EGHandle_Software, kSWEvent_ParentTaskCall );\
+                            xEventGroupClearBits( EGHandle_Software, kSWEvent_ChildTaskCall  );\
+                        } while(0)
+
+#define IS_CHILDCALL    ( kSWEvent_ChildTaskCall  == xEventGroupGetBits( EGHandle_Software ) )
+#define IS_PARENTCALL   ( kSWEvent_ParentTaskCall == xEventGroupGetBits( EGHandle_Software ) )                        
+
 static StaticTask_t   Task_TCB_main;
 static StackType_t    Task_Stack_main[384];
 void __TaskStatic_main( void* param ){
@@ -107,14 +140,13 @@ void __TaskStatic_main( void* param ){
     SmartPi.exit  = false;
     while(1){
         switch( SmartPi.serv_ID ){
-// $ROOT$
 case ROOT:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
     SmartPi.serv_ID        = ROOT;
     SmartPi.serv_ID_tmp    = 1;
-    SmartPi.numOfNextNodes = 2;
+    SmartPi.numOfNextNodes = 3;
 
     taskENTER_CRITICAL();
     SmartPi.cache_task_num    = 2;
@@ -129,8 +161,8 @@ case ROOT:{
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
 
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000000_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000000_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
 
 /*====================================================================
@@ -160,7 +192,6 @@ case ROOT:{
     break;
 }
 
-// $ROOT$ -> Hardware
 case ROOT_Hardware:{
 /*====================================================================
  * Init  初始化
@@ -182,8 +213,8 @@ case ROOT_Hardware:{
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
 
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000001_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000001_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
 
 /*====================================================================
@@ -198,10 +229,7 @@ case ROOT_Hardware:{
  * Clear  清除任务
 =====================================================================*/
     taskENTER_CRITICAL();
-    for( int i=0; i<SmartPi.cache_task_num; i++ ){
-        vTaskDelete( SmartPi.cache_task_handle[i] );
-    }
-
+    SmartPi.deleteSubtask();
     taskEXIT_CRITICAL();
     
 /*====================================================================
@@ -211,16 +239,65 @@ case ROOT_Hardware:{
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
     else{
         __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
-        // SmartPi.serv_ID <<= 4;
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Hardware_ + SmartPi.serv_ID_tmp);
     }
+    break;
+}
+                
+case ROOT_Game:{
+/*====================================================================
+ * Init  初始化
+=====================================================================*/
+    SmartPi.serv_ID           = ROOT_Game;
+    SmartPi.serv_ID_tmp       = 1;
+    SmartPi.numOfNextNodes    = 1;
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
     
-    SmartPi.cache_task_num    = 0;
-    SmartPi.cache_task_handle = NULL;
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left    |
+                                             kHWEvent_JoySitck_Down    |
+                                             kHWEvent_JoySitck_Up      |
+                                             kHWEvent_JoySitck_Pressed );
+    
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+    taskENTER_CRITICAL();
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Game, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Game, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+    
+/*====================================================================
+ * Blocked  阻塞区
+=====================================================================*/
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                            pdTRUE,          // 清除该位
+                                            pdTRUE,          // 等待所有指定的Bit
+                                            portMAX_DELAY ); // 永久等待
+    
+/*====================================================================
+ * Clear  清除任务
+=====================================================================*/
+    taskENTER_CRITICAL();
+    SmartPi.deleteSubtask();
+    taskEXIT_CRITICAL();
+    
+/*====================================================================
+ * Next  进入下一业务
+=====================================================================*/
+    if( SmartPi.serv_ID_tmp == 0 )
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    else{
+        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Game_ + SmartPi.serv_ID_tmp);
+
+        // 进入下一业务, 这是一个父任务, 应该告知为 父任务Call
+        xEventGroupSetBits   ( EGHandle_Software, kSWEvent_ParentTaskCall );
+        xEventGroupClearBits ( EGHandle_Software, kSWEvent_ChildTaskCall  );
+    }
+    
     break;
 }
                
-// $ROOT$ -> Hardware -> NRF24L01
 case ROOT_Hardware_NRF24L01:{
 /*====================================================================
  * Init  初始化
@@ -241,14 +318,9 @@ case ROOT_Hardware_NRF24L01:{
 
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
-    
-//    // 用于信息交互的临时数据
-//    struct{
-//
-//    }param;
 
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000011_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000011_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
 
 /*====================================================================
@@ -263,10 +335,7 @@ case ROOT_Hardware_NRF24L01:{
  * Clear  清除任务
 =====================================================================*/
     taskENTER_CRITICAL();
-    for( int i=0; i<SmartPi.cache_task_num; i++ ){
-        vTaskDelete( SmartPi.cache_task_handle[i] );
-    }
-
+    SmartPi.deleteSubtask();
     taskEXIT_CRITICAL();
     
 /*====================================================================
@@ -285,8 +354,6 @@ case ROOT_Hardware_NRF24L01:{
     break;
 }
                 
-// $ROOT$ -> Hardware -> NRF24L01 -> RX Address
-// $ROOT$ -> Hardware -> NRF24L01 -> TX Address
 case ROOT_Hardware_NRF24L01_RXAddress:
 case ROOT_Hardware_NRF24L01_TXAddress:{
 /*====================================================================
@@ -319,8 +386,8 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
     }
     
     
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_UI   , NULL, 256, &param, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000112_CTRL , NULL, 128, &param, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) , NULL, 256, &param, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) , NULL, 128, &param, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
     
 /*====================================================================
@@ -355,8 +422,6 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
     break;
 }
                 
-                
-// $ROOT$ -> Hardware -> JoyStick
 case ROOT_Hardware_JoyStick:{
 /*====================================================================
  * Init  初始化
@@ -372,8 +437,8 @@ case ROOT_Hardware_JoyStick:{
 
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000012_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000012_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_JoyStick, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
 /*====================================================================
  * Blocked  阻塞区
@@ -403,7 +468,6 @@ case ROOT_Hardware_JoyStick:{
     break;
 }
 
-// $ROOT$ -> Hardware -> LED
 case ROOT_Hardware_LED:{
 /*====================================================================
  * Init  初始化
@@ -423,8 +487,8 @@ case ROOT_Hardware_LED:{
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
 
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000013_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000013_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_LED, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     vTaskSuspend( THandle_led_heart );
     taskEXIT_CRITICAL();
 
@@ -456,7 +520,6 @@ case ROOT_Hardware_LED:{
     break;
 }
                 
-// $ROOT$ -> Hardware -> BEEPER
 case ROOT_Hardware_Beeper:{
 /*====================================================================
  * Init  初始化
@@ -476,8 +539,8 @@ case ROOT_Hardware_Beeper:{
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
 
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000015_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_0x00000015_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_Beeper, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
 
 /*====================================================================
@@ -507,6 +570,127 @@ case ROOT_Hardware_Beeper:{
     break;
 }
                 
+case ROOT_Game_Manila:{
+/*====================================================================
+ * Init  初始化
+=====================================================================*/
+    
+    SmartPi.serv_ID           = ROOT_Game_Manila;
+    SmartPi.serv_ID_tmp       = 1;
+    SmartPi.numOfNextNodes    = 8;
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+    
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+
+    taskENTER_CRITICAL();
+
+    
+    if( kSWEvent_ParentTaskCall == xEventGroupGetBits( EGHandle_Software ) ){
+        // 初始化Manila项目
+        SMP_Proj_Manila_init();
+    }
+    
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Game_Manila, UI   ) , NULL, 256, NULL, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Game_Manila, CTRL ) , NULL, 128, NULL, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+
+/*====================================================================
+ * Blocked  阻塞区
+=====================================================================*/
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                            pdTRUE,          // 清除该位
+                                            pdTRUE,          // 等待所有指定的Bit
+                                            portMAX_DELAY ); // 永久等待
+
+/*====================================================================
+ * Clear  清除任务
+=====================================================================*/
+    taskENTER_CRITICAL();
+    SmartPi.deleteSubtask();
+    taskEXIT_CRITICAL();
+
+/*====================================================================
+ * Shift  跳转业务
+=====================================================================*/
+    if( SmartPi.serv_ID_tmp == 0 ){
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+        SMP_Proj_Manila_deinit();
+        I_AM_CHILD;
+    }else{
+        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Game_Manila_ + SmartPi.serv_ID_tmp);
+        I_AM_PARENT;
+    }
+
+    break;
+}
+
+case ROOT_Game_Manila_ShipDiagram:{
+/*====================================================================
+ * Init  初始化
+=====================================================================*/
+    
+    SmartPi.serv_ID           = ROOT_Game_Manila;
+    SmartPi.serv_ID_tmp       = 1;
+    SmartPi.numOfNextNodes    = 0;
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+    
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+
+
+    // 缓存的数据结构, 需与子任务同步
+    struct{
+        int8_t idx;
+        struct {
+            int8_t pos;
+            int8_t shipment;
+        }boat_info[3];
+        int8_t round;
+    }cache;
+    
+    // 初始化缓存
+    cache.idx = 0;
+    for( int8_t i=0; i<3; i++ ){
+            cache.boat_info[i].shipment = Manila->boat[i].shipment;
+            cache.boat_info[i].pos      = Manila->boat[i].pos;
+    }
+    cache.round = Manila->dice_round;
+    
+    // 分配任务, 并传入缓存数据
+    taskENTER_CRITICAL();
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) , NULL, 256, &cache, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, CTRL ) , NULL, 128, &cache, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+/*====================================================================
+ * Blocked  阻塞区
+=====================================================================*/
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                            pdTRUE,          // 清除该位
+                                            pdTRUE,          // 等待所有指定的Bit
+                                            portMAX_DELAY ); // 永久等待
+    // 收集完数据后开始分析
+    SMP_Proj_Manila_analyze();
+/*====================================================================
+ * Clear  清除任务
+=====================================================================*/
+    taskENTER_CRITICAL();
+    SmartPi.deleteSubtask();
+    taskEXIT_CRITICAL();
+    
+/*====================================================================
+ * Back  返回上一业务
+=====================================================================*/
+    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    
+    // 这是一个子节点任务, 返回时应告知为 子任务Call
+    I_AM_CHILD;
+    break;
+}
+                
 default:{
     taskENTER_CRITICAL();
     SmartPi.cache_task_num    = 2;
@@ -517,8 +701,8 @@ default:{
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
 
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_default_UI   , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  __subtask_default_CTRL , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, default   , UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, default   , CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
     
     // 进入阻塞, 直到子任务完成为止
@@ -600,7 +784,7 @@ void __Task_init( void ){
                                             "__TaskStatic_led_heart"   , \
                                             sizeof( Task_Stack_led_heart ), NULL, 4, Task_Stack_led_heart, &Task_TCB_led_heart );
     
-    memset( &SmartPi, 0, sizeof(SmartPi) );
+//    memset( &SmartPi, 0, sizeof(SmartPi) );
 
     SmartPi.serv_ID_Stack = __Stack_createBase( NULL );
 #ifdef RH_DEBUG    

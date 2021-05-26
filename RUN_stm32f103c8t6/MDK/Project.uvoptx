@@ -158,7 +158,40 @@
           <Name>-T0</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint/>
+      <Breakpoint>
+        <Bp>
+          <Number>0</Number>
+          <Type>0</Type>
+          <LineNumber>1554</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134263998</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\core\SmartPi\RH_subtask.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\Project\../../core/SmartPi/RH_subtask.c\1554</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>1447</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134265086</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\core\SmartPi\RH_subtask.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\\../../core/SmartPi/RH_subtask.c\1447</Expression>
+        </Bp>
+      </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -183,22 +216,17 @@
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>config</ItemText>
+          <ItemText>cache</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>FCFG</ItemText>
+          <ItemText>cache</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>config-&gt;menuList[0].text</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>p-&gt;bucket</ItemText>
+          <ItemText>config</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
@@ -674,7 +702,7 @@
 
   <Group>
     <GroupName>Glucoo</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1319,6 +1347,26 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\core\BlackHouse\BLK_utility.c</PathWithFileName>
       <FilenameWithoutPath>BLK_utility.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>SmartPi proj</GroupName>
+    <tvExp>0</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>14</GroupNumber>
+      <FileNumber>81</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\core\SmartPi\project\game\manila.c</PathWithFileName>
+      <FilenameWithoutPath>manila.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
