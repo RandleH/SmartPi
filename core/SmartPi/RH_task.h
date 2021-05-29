@@ -46,9 +46,9 @@ typedef enum{
 }E_TaskID_t;
 
 struct __SmartPiService_t{
-    E_TaskID_t        serv_ID;         // 当前业务号
-    __Stack_t*        serv_ID_Stack;   // 业务栈
-    volatile uint32_t serv_ID_tmp;     // 临时预选业务号
+    E_TaskID_t          serv_ID;         // 当前业务号
+    BLK_SRCT(Stack)*  serv_ID_Stack;   // 业务栈
+    volatile uint32_t   serv_ID_tmp;     // 临时预选业务号
 
     int8_t            numOfNextNodes;  
     

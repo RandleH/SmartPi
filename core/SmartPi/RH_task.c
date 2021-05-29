@@ -236,9 +236,9 @@ case ROOT_Hardware:{
  * Next  进入下一业务
 =====================================================================*/
     if( SmartPi.serv_ID_tmp == 0 )
-        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     else{
-        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        BLK_FUNC( Stack, push )( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Hardware_ + SmartPi.serv_ID_tmp);
     }
     break;
@@ -285,9 +285,9 @@ case ROOT_Game:{
  * Next  进入下一业务
 =====================================================================*/
     if( SmartPi.serv_ID_tmp == 0 )
-        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     else{
-        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        BLK_FUNC( Stack, push )( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Game_ + SmartPi.serv_ID_tmp);
 
         // 进入下一业务, 这是一个父任务, 应该告知为 父任务Call
@@ -342,9 +342,9 @@ case ROOT_Hardware_NRF24L01:{
  * Next  进入下一业务
 =====================================================================*/
     if( SmartPi.serv_ID_tmp == 0 )
-        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     else{
-        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        BLK_FUNC( Stack, push )( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
         // SmartPi.serv_ID <<= 4;
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Hardware_NRF24L01_ + SmartPi.serv_ID_tmp);
     }
@@ -416,7 +416,7 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
     break;
@@ -461,7 +461,7 @@ case ROOT_Hardware_JoyStick:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
@@ -513,7 +513,7 @@ case ROOT_Hardware_LED:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
@@ -563,7 +563,7 @@ case ROOT_Hardware_Beeper:{
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
-    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
@@ -615,11 +615,11 @@ case ROOT_Game_Manila:{
  * Shift  跳转业务
 =====================================================================*/
     if( SmartPi.serv_ID_tmp == 0 ){
-        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
         SMP_Proj_Manila_deinit();
         I_AM_CHILD;
     }else{
-        __Stack_push( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        BLK_FUNC( Stack, push )( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Game_Manila_ + SmartPi.serv_ID_tmp);
         I_AM_PARENT;
     }
@@ -684,7 +684,7 @@ case ROOT_Game_Manila_ShipDiagram:{
 /*====================================================================
  * Back  返回上一业务
 =====================================================================*/
-    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     
     // 这是一个子节点任务, 返回时应告知为 子任务Call
     I_AM_CHILD;
@@ -717,7 +717,7 @@ default:{
     RH_FREE( SmartPi.cache_task_handle );
     taskEXIT_CRITICAL();
 
-    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))(uint32_t)__Stack_pop( SmartPi.serv_ID_Stack );
+    SmartPi.serv_ID         = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     SmartPi.cache_task_num  = 0;
     
     break;
@@ -786,7 +786,7 @@ void __Task_init( void ){
     
 //    memset( &SmartPi, 0, sizeof(SmartPi) );
 
-    SmartPi.serv_ID_Stack = __Stack_createBase( NULL );
+    SmartPi.serv_ID_Stack = BLK_FUNC( Stack, createBase )( NULL );
 #ifdef RH_DEBUG    
     RH_ASSERT( SmartPi.serv_ID_Stack );
 #endif

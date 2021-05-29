@@ -31,22 +31,13 @@ static void __gui_insert_menu_title    ( const __GUI_Menu_t* config ){
         int x_fs = __limit( config->area.xs +(((int)(config->area.width - pF->width))>>1)     , 0, GUI_X_WIDTH-1 );
         int y_fs = __limit( config->area.ys +(((int)(pHistory->tSize - pHistory->tFontH))>>1) , 0, GUI_Y_WIDTH-1 );
         
-        // 确认画笔颜色
-        __PixelUnit_t color_text = {.data = config->color_title};
-        // 确认画布信息
-//        __GraphInfo_t info_MainScreen = {
-//            .width   = GUI_X_WIDTH ,
-//            .height  = GUI_Y_WIDTH ,
-//            .pBuffer = Screen.GRAM[M_SCREEN_MAIN][0]
-//        };
-        
     #if   ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_BIN    )
         /* 字体图像像素遍历pIter */
         uint8_t* pIter = pF->output;
         for( int y=0; y<pF->height&&y<config->area.height; y++ ){
             for( int x=0; x<pF->width; x++, pIter++ ){
                 size_t index = ((y_fs+y)>>3)*(info_MainScreen.width)+(x_fs+x);
-                if( (*pIter<128) ^ (color_text.data!=0) ){
+                if( (*pIter<128) ^ (config->color_title!=0) ){
                     info_MainScreen.pBuffer[ index ].data = __BIT_SET( info_MainScreen.pBuffer[ index ].data, (y_fs+y)%8 );
                 }else{
                     info_MainScreen.pBuffer[ index ].data = __BIT_CLR( info_MainScreen.pBuffer[ index ].data, (y_fs+y)%8 );
@@ -55,7 +46,20 @@ static void __gui_insert_menu_title    ( const __GUI_Menu_t* config ){
             }
         }
     #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-        RH_ASSERT(0);
+        /* 字体图像像素遍历pIter */
+        uint8_t       *pIterFont = pF->output;
+        __PixelUnit_t *pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+        
+        for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+            register int x=0;
+            for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                if( *pIterFont>128 ){
+                    pIterScr->data = config->color_title;
+                }
+            }
+            pIterScr -= x;
+            pIterScr += info_MainScreen.width;
+        }
     #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
         RH_ASSERT(0);
     #endif
@@ -89,27 +93,20 @@ static void __gui_insert_menu_bar      ( const __GUI_Menu_t* config ){
     // 确认画笔颜色
     __PixelUnit_t text_color = {.data = config->text_color};
     
-    // 确认画布信息
-//    __GraphInfo_t info_MainScreen = {
-//        .width   = GUI_X_WIDTH ,
-//        .height  = GUI_Y_WIDTH ,
-//        .pBuffer = Screen.GRAM[M_SCREEN_MAIN][0]
-//    };
-    
     for ( int8_t i=0; i<pHistory->nItemPer&&i<config->nItem; i++, y_fs+=pHistory->bSize, ys+=pHistory->bSize ) {
         int cnt = __Font_getWordNum( config->area.width, config->menuList[pHistory->idx+i].text ); // 计算最多可容纳的字符个数
         char* p = NULL;
         
         if( i == pHistory->cur ){  // 该行被选中, 颜色选反色
             text_color.data = REVERSE_COLOR( config->text_color );
-            __Graph_set_penColor( config->sl_color );
+            BLK_FUNC( Graph, set_penColor )( config->sl_color );
         }else{                     // 该行未被选中
             text_color.data = config->text_color;
-            __Graph_set_penColor( config->bk_color );
+            BLK_FUNC( Graph, set_penColor )( config->bk_color );
         }
         
         // 绘制背景色
-        __Graph_rect_fill(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
+        BLK_FUNC( Graph, rect_fill )(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
         
         if( cnt>0 ){
             p = alloca( cnt+sizeof('\0') );             // 分配空间
@@ -131,7 +128,20 @@ static void __gui_insert_menu_bar      ( const __GUI_Menu_t* config ){
                 }
             }
         #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-            RH_ASSERT(0);
+            /* 字体图像像素遍历pIterFont */
+            uint8_t*       pIterFont = pF->output;
+            __PixelUnit_t* pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+            for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+                register int x=0;
+                for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                    if( *pIterFont > 128 ){
+                        *pIterScr = text_color;
+                    }
+                }
+                pIterScr -= x;
+                pIterScr += info_MainScreen.width;
+            }
+
         #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
             RH_ASSERT(0);
         #endif
@@ -163,13 +173,6 @@ static void __gui_scroll_menu_up       ( const __GUI_Menu_t* config ){
     // 确认画笔颜色
     __PixelUnit_t text_color = {.data = config->text_color};
     
-    // 确认画布信息
-//    __GraphInfo_t info_MainScreen = {
-//        .width   = GUI_X_WIDTH ,
-//        .height  = GUI_Y_WIDTH ,
-//        .pBuffer = Screen.GRAM[M_SCREEN_MAIN][0]
-//    };
-    
     if( pHistory->cur == 0 ){       //  游标已经到顶, 只能滑动菜单
         if( pHistory->idx > 0 ){    //  菜单未到顶,向上滑动一栏
             pHistory->idx--;
@@ -180,14 +183,14 @@ static void __gui_scroll_menu_up       ( const __GUI_Menu_t* config ){
                 
                 if( i == 0 ){        // 首行颜色选反色
                     text_color.data = REVERSE_COLOR( config->text_color );
-                    __Graph_set_penColor( config->sl_color );
+                    BLK_FUNC( Graph, set_penColor )( config->sl_color );
                 }else{                     // 该行未被选中
                     text_color.data = config->text_color;
-                    __Graph_set_penColor( config->bk_color );
+                    BLK_FUNC( Graph, set_penColor )( config->bk_color );
                 }
                 
                 // 绘制背景色
-                __Graph_rect_fill(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
+                BLK_FUNC( Graph, rect_fill )(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
                 
                 if( cnt>0 ){
                     p = alloca( cnt+sizeof('\0') );             // 分配空间
@@ -209,7 +212,20 @@ static void __gui_scroll_menu_up       ( const __GUI_Menu_t* config ){
                         }
                     }
                 #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-                    RH_ASSERT(0);
+                    /* 字体图像像素遍历pIterFont */
+                    uint8_t*       pIterFont = pF->output;
+                    __PixelUnit_t* pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+                    for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+                        register int x=0;
+                        for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                            if( *pIterFont > 128 ){
+                                *pIterScr = text_color;
+                            }
+                        }
+                        pIterScr -= x;
+                        pIterScr += info_MainScreen.width;
+                    }
+                    RH_ASSERT(1);
                 #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
                     RH_ASSERT(0);
                 #endif
@@ -227,13 +243,13 @@ static void __gui_scroll_menu_up       ( const __GUI_Menu_t* config ){
         char* p = NULL;
         // 配置画笔颜色
         text_color.data = config->text_color;
-        __Graph_set_penColor( config->bk_color );
+        BLK_FUNC( Graph, set_penColor )( config->bk_color );
         
         // 重新配置坐标起始位置
         ys   += (pHistory->cur+1)*pHistory->bSize;
         y_fs += (pHistory->cur+1)*pHistory->bSize;
         // 绘制背景色
-        __Graph_rect_fill(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
+        BLK_FUNC( Graph, rect_fill )(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
         if( cnt>0 ){
             p = alloca( cnt+sizeof('\0') );             // 分配空间
             strncpy(p, config->menuList[pHistory->idx+pHistory->cur+1].text, cnt);  // 截取字符串到该空间
@@ -254,7 +270,20 @@ static void __gui_scroll_menu_up       ( const __GUI_Menu_t* config ){
                 }
             }
         #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-            RH_ASSERT(0);
+            /* 字体图像像素遍历pIterFont */
+            uint8_t*       pIterFont = pF->output;
+            __PixelUnit_t* pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+            for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+                register int x=0;
+                for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                    if( *pIterFont > 128 ){
+                        *pIterScr = text_color;
+                    }
+                }
+                pIterScr -= x;
+                pIterScr += info_MainScreen.width;
+            }
+            RH_ASSERT(1);
         #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
             RH_ASSERT(0);
         #endif
@@ -265,14 +294,14 @@ static void __gui_scroll_menu_up       ( const __GUI_Menu_t* config ){
         p = NULL;
         // 配置画笔颜色
         text_color.data = REVERSE_COLOR( config->text_color );
-        __Graph_set_penColor( config->sl_color );
+        BLK_FUNC( Graph, set_penColor )( config->sl_color );
         
         // 重新配置坐标起始位置
         ys   -= pHistory->bSize;
         y_fs -= pHistory->bSize;
         
         // 绘制背景色
-        __Graph_rect_fill(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
+        BLK_FUNC( Graph, rect_fill )(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
         
         if( cnt>0 ){
             p = alloca( cnt+sizeof('\0') );             // 分配空间
@@ -294,7 +323,20 @@ static void __gui_scroll_menu_up       ( const __GUI_Menu_t* config ){
                 }
             }
         #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-            RH_ASSERT(0);
+            /* 字体图像像素遍历pIterFont */
+            uint8_t*       pIterFont = pF->output;
+            __PixelUnit_t* pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+            for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+                register int x=0;
+                for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                    if( *pIterFont > 128 ){
+                        *pIterScr = text_color;
+                    }
+                }
+                pIterScr -= x;
+                pIterScr += info_MainScreen.width;
+            }
+            RH_ASSERT(1);
         #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
             RH_ASSERT(0);
         #endif
@@ -327,13 +369,6 @@ static void __gui_scroll_menu_down     ( const __GUI_Menu_t* config ){
     // 确认画笔颜色
     __PixelUnit_t text_color = {.data = config->text_color};
     
-    // 确认画布信息
-//    __GraphInfo_t info_MainScreen = {
-//        .width   = GUI_X_WIDTH ,
-//        .height  = GUI_Y_WIDTH ,
-//        .pBuffer = Screen.GRAM[M_SCREEN_MAIN][0]
-//    };
-    
     if( pHistory->cur+1==pHistory->nItemPer ){ // 游标到达底端, 只能滑动菜单
         if( pHistory->idx < config->nItem-pHistory->nItemPer ){ // 菜单未到底, 向下滑动一栏
             pHistory->idx++;
@@ -344,14 +379,14 @@ static void __gui_scroll_menu_down     ( const __GUI_Menu_t* config ){
                 
                 if( i == pHistory->nItemPer-1 ){        // 首行颜色选反色
                     text_color.data = REVERSE_COLOR( config->text_color );
-                    __Graph_set_penColor( config->sl_color );
+                    BLK_FUNC( Graph, set_penColor )( config->sl_color );
                 }else{                     // 该行未被选中
                     text_color.data = config->text_color;
-                    __Graph_set_penColor( config->bk_color );
+                    BLK_FUNC( Graph, set_penColor )( config->bk_color );
                 }
                 
                 // 绘制背景色
-                __Graph_rect_fill(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
+                BLK_FUNC( Graph, rect_fill )(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
                 
                 if( cnt>0 ){
                     p = alloca( cnt+sizeof('\0') );             // 分配空间
@@ -373,7 +408,20 @@ static void __gui_scroll_menu_down     ( const __GUI_Menu_t* config ){
                         }
                     }
                 #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-                    RH_ASSERT(0);
+                    /* 字体图像像素遍历pIterFont */
+                    uint8_t*       pIterFont = pF->output;
+                    __PixelUnit_t* pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+                    for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+                        register int x=0;
+                        for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                            if( *pIterFont > 128 ){
+                                *pIterScr = text_color;
+                            }
+                        }
+                        pIterScr -= x;
+                        pIterScr += info_MainScreen.width;
+                    }
+                    RH_ASSERT(1);
                 #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
                     RH_ASSERT(0);
                 #endif
@@ -391,13 +439,13 @@ static void __gui_scroll_menu_down     ( const __GUI_Menu_t* config ){
             char* p = NULL;
             // 配置画笔颜色
             text_color.data = config->text_color;
-            __Graph_set_penColor( config->bk_color );
+            BLK_FUNC( Graph, set_penColor )( config->bk_color );
             
             // 重新配置坐标起始位置
             ys   += (pHistory->cur-1)*pHistory->bSize;
             y_fs += (pHistory->cur-1)*pHistory->bSize;
             // 绘制背景色
-            __Graph_rect_fill(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
+            BLK_FUNC( Graph, rect_fill )(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
             if( cnt>0 ){
                 p = alloca( cnt+sizeof('\0') );             // 分配空间
                 strncpy(p, config->menuList[pHistory->idx+pHistory->cur-1].text, cnt);  // 截取字符串到该空间
@@ -418,7 +466,20 @@ static void __gui_scroll_menu_down     ( const __GUI_Menu_t* config ){
                     }
                 }
             #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-                RH_ASSERT(0);
+                /* 字体图像像素遍历pIterFont */
+                uint8_t*       pIterFont = pF->output;
+                __PixelUnit_t* pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+                for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+                    register int x=0;
+                    for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                        if( *pIterFont > 128 ){
+                            *pIterScr = text_color;
+                        }
+                    }
+                    pIterScr -= x;
+                    pIterScr += info_MainScreen.width;
+                }
+                RH_ASSERT(1);
             #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
                 RH_ASSERT(0);
             #endif
@@ -429,14 +490,14 @@ static void __gui_scroll_menu_down     ( const __GUI_Menu_t* config ){
             p = NULL;
             // 配置画笔颜色
             text_color.data = REVERSE_COLOR( config->text_color );
-            __Graph_set_penColor( config->sl_color );
+            BLK_FUNC( Graph, set_penColor )( config->sl_color );
             
             // 重新配置坐标起始位置
             ys   += pHistory->bSize;
             y_fs += pHistory->bSize;
             
             // 绘制背景色
-            __Graph_rect_fill(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
+            BLK_FUNC( Graph, rect_fill )(xs, ys, config->area.xs+(int)config->area.width-2, ys+pHistory->bSize, &info_MainScreen, kApplyPixel_fill );
             
             if( cnt>0 ){
                 p = alloca( cnt+sizeof('\0') );             // 分配空间
@@ -458,7 +519,20 @@ static void __gui_scroll_menu_down     ( const __GUI_Menu_t* config ){
                     }
                 }
             #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB565 )
-                RH_ASSERT(0);
+                /* 字体图像像素遍历pIterFont */
+                uint8_t*       pIterFont = pF->output;
+                __PixelUnit_t* pIterScr  = info_MainScreen.pBuffer + (y_fs*info_MainScreen.width) + x_fs;
+                for( int y=0; y<pF->height&&y<config->area.height; y++ ){
+                    register int x=0;
+                    for( ; x<pF->width; x++, pIterFont++, pIterScr++ ){
+                        if( *pIterFont > 128 ){
+                            *pIterScr = text_color;
+                        }
+                    }
+                    pIterScr -= x;
+                    pIterScr += info_MainScreen.width;
+                }
+                RH_ASSERT(1);
             #elif ( RH_CFG_GRAPHIC_COLOR_TYPE == RH_CFG_GRAPHIC_COLOR_RGB888 )
                 RH_ASSERT(0);
             #endif
@@ -502,7 +576,7 @@ E_Status_t GUI_menu_insert             ( ID_t ID ){
         int8_t nItemPer;     // 一版最多可显示菜单行数
     }*pHistory = (void*)config->history;
     
-    __Graph_backup_config();
+    BLK_FUNC( Graph, backupCache )();
     __Font_backup_config();
     __Font_setStyle( config->font );
     
@@ -527,7 +601,7 @@ E_Status_t GUI_menu_insert             ( ID_t ID ){
     
     // 绘制菜单栏
     __gui_insert_menu_bar( config );
-    __Graph_restore_config();
+    BLK_FUNC( Graph, restoreCache )();
     __Font_restore_config();
     
     GUI_is_AutoDisplay() ? GUI_RefreashScreenArea( config->area.xs, \
@@ -549,14 +623,14 @@ E_Status_t GUI_menu_frame              ( ID_t ID, bool  cmd    ){
 #endif
     __GUI_Menu_t* p = (__GUI_Menu_t*)(ID);
     
-    __Graph_backup_config();
+    BLK_FUNC( Graph, backupCache )();
     __Font_backup_config();
     
     if( cmd ){
-        __Graph_rect_raw(p->area.xs, p->area.ys, p->area.xs+(int)(p->area.width)-1, p->area.ys+(int)(p->area.height)-1, &info_MainScreen, kApplyPixel_fill);
+        BLK_FUNC( Graph, rect_raw )(p->area.xs, p->area.ys, p->area.xs+(int)(p->area.width)-1, p->area.ys+(int)(p->area.height)-1, &info_MainScreen, kApplyPixel_fill);
     }
 
-    __Graph_restore_config();
+    BLK_FUNC( Graph, restoreCache )();
     __Font_restore_config();
     return MAKE_ENUM( kStatus_Success );
 }
@@ -567,7 +641,7 @@ int        GUI_menu_scroll             ( ID_t ID, int cmd ){
     if( config->history == NULL )
         return 0;
     
-    __Graph_backup_config();
+    BLK_FUNC( Graph, backupCache )();
     __Font_backup_config();
     
     switch(cmd){
@@ -583,7 +657,7 @@ int        GUI_menu_scroll             ( ID_t ID, int cmd ){
             __gui_scroll_menu_down( config );
             break;
     }
-    __Graph_restore_config();
+    BLK_FUNC( Graph, restoreCache )();
     __Font_restore_config();
     
     GUI_is_AutoDisplay() ? GUI_RefreashScreenArea( config->area.xs, \
@@ -606,18 +680,10 @@ E_Status_t GUI_menu_delete             ( ID_t ID ){
     RH_FREE( config->menuList );
     __SET_STRUCT_MB(__GUI_Menu_t, void*, config, history, NULL);
     
-    // 确认画布信息
-//    __GraphInfo_t info_MainScreen = {
-//        .width   = GUI_X_WIDTH ,
-//        .height  = GUI_Y_WIDTH ,
-//        .pBuffer = Screen.GRAM[M_SCREEN_MAIN][0]
-//    };
+    BLK_FUNC( Graph, backupCache  )();
+    BLK_FUNC( Graph, set_penColor )(config->bk_color);
     
-    __Graph_backup_config();
-    
-    __Graph_set_penColor(config->bk_color);
-    
-    __Graph_rect_fill( config->area.xs, \
+    BLK_FUNC( Graph, rect_fill )( config->area.xs, \
                        config->area.ys, \
                        config->area.xs+(int)(config->area.width )-1, \
                        config->area.ys+(int)(config->area.height)-1, &info_MainScreen, kApplyPixel_fill);
@@ -633,7 +699,7 @@ E_Status_t GUI_menu_delete             ( ID_t ID ){
                                                  config->area.ys+(int)(config->area.height)-1);
     
     RH_FREE( config );
-    __Graph_restore_config();
+    BLK_FUNC( Graph, restoreCache )();
 
     return MAKE_ENUM( kStatus_Success );
 }
