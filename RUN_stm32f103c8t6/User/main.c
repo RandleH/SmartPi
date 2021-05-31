@@ -45,8 +45,8 @@ int main(void){
     BEEP_Init();
     NRF24L01_Init();
 
-    GUI_API_Init ();
-    GUI_Init();
+    GLU_FUNC( API, init )();
+    GLU_FUNC( GUI, init )();
     
     __Event_init();
     __Task_init();

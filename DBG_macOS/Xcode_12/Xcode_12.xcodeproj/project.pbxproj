@@ -7,6 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E34784BE2664EE5E0099C119 /* RH_subtask.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784BB2664EE5E0099C119 /* RH_subtask.c */; };
+		E34784BF2664EE5E0099C119 /* RH_task.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784BC2664EE5E0099C119 /* RH_task.c */; };
+		E34784C42664EE9E0099C119 /* GLU_glucoo.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784C32664EE9E0099C119 /* GLU_glucoo.c */; };
+		E34784CA2664EEBC0099C119 /* GLU_object.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784C92664EEBC0099C119 /* GLU_object.c */; };
+		E34784D12664EF110099C119 /* GLU_menu.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784CF2664EF100099C119 /* GLU_menu.c */; };
+		E34784D72664EF360099C119 /* GLU_font_ArialRoundedBold.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784D52664EF360099C119 /* GLU_font_ArialRoundedBold.c */; };
+		E34784D82664EF360099C119 /* GLU_font.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784D62664EF360099C119 /* GLU_font.c */; };
+		E34784DC2664EF4F0099C119 /* GLU_draw.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784DB2664EF4E0099C119 /* GLU_draw.c */; };
+		E34784F12664EF770099C119 /* BLK_utility.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784DF2664EF750099C119 /* BLK_utility.c */; };
+		E34784F22664EF770099C119 /* BLK_math.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784E02664EF760099C119 /* BLK_math.c */; };
+		E34784F32664EF770099C119 /* BLK_image.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784E22664EF760099C119 /* BLK_image.c */; };
+		E34784F42664EF770099C119 /* BLK_dsp.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784E32664EF760099C119 /* BLK_dsp.c */; };
+		E34784F52664EF770099C119 /* BLK_poker.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784E72664EF760099C119 /* BLK_poker.c */; };
+		E34784F62664EF770099C119 /* BLK_time.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784E92664EF760099C119 /* BLK_time.c */; };
+		E34784F72664EF770099C119 /* BLK_lib.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784EC2664EF760099C119 /* BLK_lib.c */; };
+		E34784F82664EF770099C119 /* BLK_graphic.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784EE2664EF770099C119 /* BLK_graphic.c */; };
+		E34784F92664EF770099C119 /* BLK_data.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784EF2664EF770099C119 /* BLK_data.c */; };
+		E347853E2664F76B0099C119 /* led.c in Sources */ = {isa = PBXBuildFile; fileRef = E34785362664F76A0099C119 /* led.c */; };
+		E347853F2664F76B0099C119 /* joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = E34785372664F76A0099C119 /* joystick.c */; };
+		E34785402664F76B0099C119 /* nrf24l01.c in Sources */ = {isa = PBXBuildFile; fileRef = E34785392664F76A0099C119 /* nrf24l01.c */; };
+		E34785412664F76B0099C119 /* ssd1306.c in Sources */ = {isa = PBXBuildFile; fileRef = E347853A2664F76A0099C119 /* ssd1306.c */; };
+		E34785422664F76B0099C119 /* beeper.c in Sources */ = {isa = PBXBuildFile; fileRef = E347853C2664F76B0099C119 /* beeper.c */; };
 		E3CE11E5265F8642004E505F /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E3CE11E4265F8642004E505F /* main.c */; };
 		E3CE11F0265F87AF004E505F /* manila.c in Sources */ = {isa = PBXBuildFile; fileRef = E3CE11EF265F87AF004E505F /* manila.c */; };
 /* End PBXBuildFile section */
@@ -24,6 +46,51 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E34784BB2664EE5E0099C119 /* RH_subtask.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = RH_subtask.c; path = ../../core/SmartPi/RH_subtask.c; sourceTree = "<group>"; };
+		E34784BC2664EE5E0099C119 /* RH_task.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = RH_task.c; path = ../../core/SmartPi/RH_task.c; sourceTree = "<group>"; };
+		E34784BD2664EE5E0099C119 /* RH_task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RH_task.h; path = ../../core/SmartPi/RH_task.h; sourceTree = "<group>"; };
+		E34784C22664EE9E0099C119 /* GLU_glucoo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLU_glucoo.h; path = ../../core/Glucoo/GLU_glucoo.h; sourceTree = "<group>"; };
+		E34784C32664EE9E0099C119 /* GLU_glucoo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GLU_glucoo.c; path = ../../core/Glucoo/GLU_glucoo.c; sourceTree = "<group>"; };
+		E34784C82664EEBC0099C119 /* GLU_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLU_object.h; path = ../../core/Glucoo/object/GLU_object.h; sourceTree = "<group>"; };
+		E34784C92664EEBC0099C119 /* GLU_object.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GLU_object.c; path = ../../core/Glucoo/object/GLU_object.c; sourceTree = "<group>"; };
+		E34784CF2664EF100099C119 /* GLU_menu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GLU_menu.c; path = ../../core/Glucoo/menu/GLU_menu.c; sourceTree = "<group>"; };
+		E34784D02664EF100099C119 /* GLU_menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLU_menu.h; path = ../../core/Glucoo/menu/GLU_menu.h; sourceTree = "<group>"; };
+		E34784D42664EF360099C119 /* GLU_font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLU_font.h; path = ../../core/Glucoo/font/GLU_font.h; sourceTree = "<group>"; };
+		E34784D52664EF360099C119 /* GLU_font_ArialRoundedBold.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GLU_font_ArialRoundedBold.c; path = ../../core/Glucoo/font/GLU_font_ArialRoundedBold.c; sourceTree = "<group>"; };
+		E34784D62664EF360099C119 /* GLU_font.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GLU_font.c; path = ../../core/Glucoo/font/GLU_font.c; sourceTree = "<group>"; };
+		E34784DB2664EF4E0099C119 /* GLU_draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GLU_draw.c; path = ../../core/Glucoo/draw/GLU_draw.c; sourceTree = "<group>"; };
+		E34784DF2664EF750099C119 /* BLK_utility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_utility.c; path = ../../core/BlackHouse/BLK_utility.c; sourceTree = "<group>"; };
+		E34784E02664EF760099C119 /* BLK_math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_math.c; path = ../../core/BlackHouse/BLK_math.c; sourceTree = "<group>"; };
+		E34784E12664EF760099C119 /* BLK_data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_data.h; path = ../../core/BlackHouse/BLK_data.h; sourceTree = "<group>"; };
+		E34784E22664EF760099C119 /* BLK_image.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_image.c; path = ../../core/BlackHouse/BLK_image.c; sourceTree = "<group>"; };
+		E34784E32664EF760099C119 /* BLK_dsp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_dsp.c; path = ../../core/BlackHouse/BLK_dsp.c; sourceTree = "<group>"; };
+		E34784E42664EF760099C119 /* BLK_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_math.h; path = ../../core/BlackHouse/BLK_math.h; sourceTree = "<group>"; };
+		E34784E52664EF760099C119 /* BLK_graphic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_graphic.h; path = ../../core/BlackHouse/BLK_graphic.h; sourceTree = "<group>"; };
+		E34784E62664EF760099C119 /* BLK_lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_lib.h; path = ../../core/BlackHouse/BLK_lib.h; sourceTree = "<group>"; };
+		E34784E72664EF760099C119 /* BLK_poker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_poker.c; path = ../../core/BlackHouse/BLK_poker.c; sourceTree = "<group>"; };
+		E34784E82664EF760099C119 /* BLK_poker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_poker.h; path = ../../core/BlackHouse/BLK_poker.h; sourceTree = "<group>"; };
+		E34784E92664EF760099C119 /* BLK_time.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_time.c; path = ../../core/BlackHouse/BLK_time.c; sourceTree = "<group>"; };
+		E34784EA2664EF760099C119 /* BLK_utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_utility.h; path = ../../core/BlackHouse/BLK_utility.h; sourceTree = "<group>"; };
+		E34784EB2664EF760099C119 /* BLK_dsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_dsp.h; path = ../../core/BlackHouse/BLK_dsp.h; sourceTree = "<group>"; };
+		E34784EC2664EF760099C119 /* BLK_lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_lib.c; path = ../../core/BlackHouse/BLK_lib.c; sourceTree = "<group>"; };
+		E34784ED2664EF760099C119 /* BLK_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_image.h; path = ../../core/BlackHouse/BLK_image.h; sourceTree = "<group>"; };
+		E34784EE2664EF770099C119 /* BLK_graphic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_graphic.c; path = ../../core/BlackHouse/BLK_graphic.c; sourceTree = "<group>"; };
+		E34784EF2664EF770099C119 /* BLK_data.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_data.c; path = ../../core/BlackHouse/BLK_data.c; sourceTree = "<group>"; };
+		E34784F02664EF770099C119 /* BLK_time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_time.h; path = ../../core/BlackHouse/BLK_time.h; sourceTree = "<group>"; };
+		E34784FC2664EFAF0099C119 /* stb_truetype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stb_truetype.h; path = ../../core/STB/stb_truetype.h; sourceTree = "<group>"; };
+		E347852F2664F4BD0099C119 /* FreeRTOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FreeRTOS.h; path = ../../Libraries/FreeRTOS.h; sourceTree = "<group>"; };
+		E34785302664F4BD0099C119 /* event_groups.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event_groups.h; path = ../../Libraries/event_groups.h; sourceTree = "<group>"; };
+		E34785312664F4BD0099C119 /* task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = task.h; path = ../../Libraries/task.h; sourceTree = "<group>"; };
+		E34785342664F76A0099C119 /* beeper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = beeper.h; path = ../../BSP/beeper.h; sourceTree = "<group>"; };
+		E34785352664F76A0099C119 /* ssd1306.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ssd1306.h; path = ../../BSP/ssd1306.h; sourceTree = "<group>"; };
+		E34785362664F76A0099C119 /* led.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = led.c; path = ../../BSP/led.c; sourceTree = "<group>"; };
+		E34785372664F76A0099C119 /* joystick.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = joystick.c; path = ../../BSP/joystick.c; sourceTree = "<group>"; };
+		E34785382664F76A0099C119 /* joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = joystick.h; path = ../../BSP/joystick.h; sourceTree = "<group>"; };
+		E34785392664F76A0099C119 /* nrf24l01.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nrf24l01.c; path = ../../BSP/nrf24l01.c; sourceTree = "<group>"; };
+		E347853A2664F76A0099C119 /* ssd1306.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ssd1306.c; path = ../../BSP/ssd1306.c; sourceTree = "<group>"; };
+		E347853B2664F76B0099C119 /* led.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = led.h; path = ../../BSP/led.h; sourceTree = "<group>"; };
+		E347853C2664F76B0099C119 /* beeper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = beeper.c; path = ../../BSP/beeper.c; sourceTree = "<group>"; };
+		E347853D2664F76B0099C119 /* nrf24l01.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nrf24l01.h; path = ../../BSP/nrf24l01.h; sourceTree = "<group>"; };
 		E3CE11E1265F8642004E505F /* Xcode_12 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Xcode_12; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3CE11E4265F8642004E505F /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; wrapsLines = 0; };
 		E3CE11EE265F87AF004E505F /* manila.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = manila.h; path = ../../../core/SmartPi/project/game/manila.h; sourceTree = "<group>"; };
@@ -44,9 +111,134 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E34784B92664EE070099C119 /* SmartPi */ = {
+			isa = PBXGroup;
+			children = (
+				E34784BB2664EE5E0099C119 /* RH_subtask.c */,
+				E34784BC2664EE5E0099C119 /* RH_task.c */,
+				E34784BD2664EE5E0099C119 /* RH_task.h */,
+			);
+			name = SmartPi;
+			sourceTree = "<group>";
+		};
+		E34784C12664EE860099C119 /* Glucoo */ = {
+			isa = PBXGroup;
+			children = (
+				E34784DA2664EF400099C119 /* draw */,
+				E34784D32664EF160099C119 /* font */,
+				E34784CE2664EEFF0099C119 /* menu */,
+				E34784C72664EEAB0099C119 /* object */,
+				E34784C32664EE9E0099C119 /* GLU_glucoo.c */,
+				E34784C22664EE9E0099C119 /* GLU_glucoo.h */,
+			);
+			name = Glucoo;
+			sourceTree = "<group>";
+		};
+		E34784C72664EEAB0099C119 /* object */ = {
+			isa = PBXGroup;
+			children = (
+				E34784C92664EEBC0099C119 /* GLU_object.c */,
+				E34784C82664EEBC0099C119 /* GLU_object.h */,
+			);
+			name = object;
+			sourceTree = "<group>";
+		};
+		E34784CE2664EEFF0099C119 /* menu */ = {
+			isa = PBXGroup;
+			children = (
+				E34784CF2664EF100099C119 /* GLU_menu.c */,
+				E34784D02664EF100099C119 /* GLU_menu.h */,
+			);
+			name = menu;
+			sourceTree = "<group>";
+		};
+		E34784D32664EF160099C119 /* font */ = {
+			isa = PBXGroup;
+			children = (
+				E34784D52664EF360099C119 /* GLU_font_ArialRoundedBold.c */,
+				E34784D62664EF360099C119 /* GLU_font.c */,
+				E34784D42664EF360099C119 /* GLU_font.h */,
+			);
+			name = font;
+			sourceTree = "<group>";
+		};
+		E34784DA2664EF400099C119 /* draw */ = {
+			isa = PBXGroup;
+			children = (
+				E34784DB2664EF4E0099C119 /* GLU_draw.c */,
+			);
+			name = draw;
+			sourceTree = "<group>";
+		};
+		E34784DE2664EF5F0099C119 /* BlackHouse */ = {
+			isa = PBXGroup;
+			children = (
+				E34784EF2664EF770099C119 /* BLK_data.c */,
+				E34784E12664EF760099C119 /* BLK_data.h */,
+				E34784E32664EF760099C119 /* BLK_dsp.c */,
+				E34784EB2664EF760099C119 /* BLK_dsp.h */,
+				E34784EE2664EF770099C119 /* BLK_graphic.c */,
+				E34784E52664EF760099C119 /* BLK_graphic.h */,
+				E34784E22664EF760099C119 /* BLK_image.c */,
+				E34784ED2664EF760099C119 /* BLK_image.h */,
+				E34784EC2664EF760099C119 /* BLK_lib.c */,
+				E34784E62664EF760099C119 /* BLK_lib.h */,
+				E34784E02664EF760099C119 /* BLK_math.c */,
+				E34784E42664EF760099C119 /* BLK_math.h */,
+				E34784E72664EF760099C119 /* BLK_poker.c */,
+				E34784E82664EF760099C119 /* BLK_poker.h */,
+				E34784E92664EF760099C119 /* BLK_time.c */,
+				E34784F02664EF770099C119 /* BLK_time.h */,
+				E34784DF2664EF750099C119 /* BLK_utility.c */,
+				E34784EA2664EF760099C119 /* BLK_utility.h */,
+			);
+			name = BlackHouse;
+			sourceTree = "<group>";
+		};
+		E34784FB2664EF9F0099C119 /* STB */ = {
+			isa = PBXGroup;
+			children = (
+				E34784FC2664EFAF0099C119 /* stb_truetype.h */,
+			);
+			name = STB;
+			sourceTree = "<group>";
+		};
+		E347852E2664F49D0099C119 /* freeRTOS( virtual ) */ = {
+			isa = PBXGroup;
+			children = (
+				E34785302664F4BD0099C119 /* event_groups.h */,
+				E347852F2664F4BD0099C119 /* FreeRTOS.h */,
+				E34785312664F4BD0099C119 /* task.h */,
+			);
+			path = "freeRTOS( virtual )";
+			sourceTree = "<group>";
+		};
+		E34785332664F6F10099C119 /* BSP */ = {
+			isa = PBXGroup;
+			children = (
+				E347853C2664F76B0099C119 /* beeper.c */,
+				E34785342664F76A0099C119 /* beeper.h */,
+				E34785372664F76A0099C119 /* joystick.c */,
+				E34785382664F76A0099C119 /* joystick.h */,
+				E34785362664F76A0099C119 /* led.c */,
+				E347853B2664F76B0099C119 /* led.h */,
+				E34785392664F76A0099C119 /* nrf24l01.c */,
+				E347853D2664F76B0099C119 /* nrf24l01.h */,
+				E347853A2664F76A0099C119 /* ssd1306.c */,
+				E34785352664F76A0099C119 /* ssd1306.h */,
+			);
+			path = BSP;
+			sourceTree = "<group>";
+		};
 		E3CE11D8265F8642004E505F = {
 			isa = PBXGroup;
 			children = (
+				E34785332664F6F10099C119 /* BSP */,
+				E347852E2664F49D0099C119 /* freeRTOS( virtual ) */,
+				E34784FB2664EF9F0099C119 /* STB */,
+				E34784DE2664EF5F0099C119 /* BlackHouse */,
+				E34784C12664EE860099C119 /* Glucoo */,
+				E34784B92664EE070099C119 /* SmartPi */,
 				E3CE11F6265F88E6004E505F /* Self */,
 				E3CE11F2265F8840004E505F /* Common */,
 				E3CE11ED265F8791004E505F /* Manila */,
@@ -153,7 +345,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E34784D12664EF110099C119 /* GLU_menu.c in Sources */,
+				E34784F52664EF770099C119 /* BLK_poker.c in Sources */,
+				E34784F62664EF770099C119 /* BLK_time.c in Sources */,
+				E34784F12664EF770099C119 /* BLK_utility.c in Sources */,
+				E34785422664F76B0099C119 /* beeper.c in Sources */,
+				E34784F32664EF770099C119 /* BLK_image.c in Sources */,
+				E34784C42664EE9E0099C119 /* GLU_glucoo.c in Sources */,
+				E34784F82664EF770099C119 /* BLK_graphic.c in Sources */,
+				E34784F72664EF770099C119 /* BLK_lib.c in Sources */,
+				E34784D82664EF360099C119 /* GLU_font.c in Sources */,
+				E34784BE2664EE5E0099C119 /* RH_subtask.c in Sources */,
+				E34784F22664EF770099C119 /* BLK_math.c in Sources */,
+				E347853E2664F76B0099C119 /* led.c in Sources */,
+				E34784F92664EF770099C119 /* BLK_data.c in Sources */,
+				E34784F42664EF770099C119 /* BLK_dsp.c in Sources */,
+				E34785402664F76B0099C119 /* nrf24l01.c in Sources */,
+				E34785412664F76B0099C119 /* ssd1306.c in Sources */,
 				E3CE11E5265F8642004E505F /* main.c in Sources */,
+				E34784D72664EF360099C119 /* GLU_font_ArialRoundedBold.c in Sources */,
+				E34784DC2664EF4F0099C119 /* GLU_draw.c in Sources */,
+				E347853F2664F76B0099C119 /* joystick.c in Sources */,
+				E34784CA2664EEBC0099C119 /* GLU_object.c in Sources */,
+				E34784BF2664EE5E0099C119 /* RH_task.c in Sources */,
 				E3CE11F0265F87AF004E505F /* manila.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

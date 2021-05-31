@@ -49,11 +49,12 @@ void MAKE_TASK( subtask, ROOT, UI   ) ( void* param ){
         m[2].text = "About";
         cfg.menuList = m;
     
-        ID_Menu = GUI_menu_create(&cfg);
+        ID_Menu = GLU_FUNC( Menu, create )(&cfg);
 	}
-    GUI_menu_frame  ( ID_Menu, 0 );
-    GUI_menu_insert ( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, frame  ) ( ID_Menu, 0 );
+    GLU_FUNC( Menu, insert ) ( ID_Menu );
+
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
 
 /*====================================================================
@@ -75,16 +76,16 @@ void MAKE_TASK( subtask, ROOT, UI   ) ( void* param ){
         else                                       ans =  0;
         
         taskENTER_CRITICAL();
-        GUI_menu_scroll( ID_Menu, ans );
-        GUI_RefreashEntireScreen();
+        GLU_FUNC( Menu, scroll )( ID_Menu, ans );
+        GLU_FUNC( GUI, refreashEntireScreen )();
         taskEXIT_CRITICAL();
 	}
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_menu_delete( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, delete )( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -170,11 +171,11 @@ void MAKE_TASK( subtask, ROOT_Hardware, UI   ) ( void* param ){
 
         cfg.menuList = m;
     
-        ID_Menu = GUI_menu_create(&cfg);
+        ID_Menu = GLU_FUNC( Menu, create )(&cfg);
     }
-    GUI_menu_frame  ( ID_Menu, 0 );
-    GUI_menu_insert ( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, frame )  ( ID_Menu, 0 );
+    GLU_FUNC( Menu, insert ) ( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
 
 /*====================================================================
@@ -196,16 +197,16 @@ void MAKE_TASK( subtask, ROOT_Hardware, UI   ) ( void* param ){
         else                                       ans =  0;
         
         taskENTER_CRITICAL();
-        GUI_menu_scroll( ID_Menu, ans );
-        GUI_RefreashEntireScreen();
+        GLU_FUNC( Menu, scroll )( ID_Menu, ans );
+        GLU_FUNC( GUI, refreashEntireScreen )();
         taskEXIT_CRITICAL();
     }
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_menu_delete( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, delete )( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -291,11 +292,11 @@ void MAKE_TASK( subtask, ROOT_Game, UI   ) ( void* param ){
 
         cfg.menuList    = m;
     
-        ID_Menu = GUI_menu_create(&cfg);
+        ID_Menu = GLU_FUNC( Menu, create )(&cfg);
     }
-    GUI_menu_frame  ( ID_Menu, 0 );
-    GUI_menu_insert ( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, frame )  ( ID_Menu, 0 );
+    GLU_FUNC( Menu, insert ) ( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
 
 /*====================================================================
@@ -317,16 +318,16 @@ void MAKE_TASK( subtask, ROOT_Game, UI   ) ( void* param ){
         else                                       ans =  0;
         
         taskENTER_CRITICAL();
-        GUI_menu_scroll( ID_Menu, ans );
-        GUI_RefreashEntireScreen();
+        GLU_FUNC( Menu, scroll )( ID_Menu, ans );
+        GLU_FUNC( GUI, refreashEntireScreen )();
         taskEXIT_CRITICAL();
     }
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_menu_delete( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, delete )( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -421,11 +422,11 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param ){
         m[4].text = "ACK";
         cfg.menuList = m;
     
-        ID_Menu = GUI_menu_create(&cfg);
+        ID_Menu = GLU_FUNC( Menu, create )(&cfg);
     }
-    GUI_menu_frame  ( ID_Menu, 0 );
-    GUI_menu_insert ( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, frame )  ( ID_Menu, 0 );
+    GLU_FUNC( Menu, insert ) ( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
 
 /*====================================================================
@@ -447,16 +448,16 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param ){
         else                                       ans =  0;
         
         taskENTER_CRITICAL();
-        GUI_menu_scroll( ID_Menu, ans );
-        GUI_RefreashEntireScreen();
+        GLU_FUNC( Menu, scroll )( ID_Menu, ans );
+        GLU_FUNC( GUI, refreashEntireScreen )();
         taskEXIT_CRITICAL();
     }
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_menu_delete( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, delete )( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -552,24 +553,24 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
         // cfg.min[0]      = 0;
         // cfg.val[0]      = p->Addr[0];
         cfg.showFrame   = true;
-        ID_Addr[0] = GUI_object_create( &cfg );
+        ID_Addr[0] = GLU_FUNC( Object, create )( &cfg );
         
         cfg.showFrame  = false;
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[1];
-        ID_Addr[1] = GUI_object_create( &cfg );
+        ID_Addr[1] = GLU_FUNC( Object, create )( &cfg );
         
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[2];
-        ID_Addr[2] = GUI_object_create( &cfg );
+        ID_Addr[2] = GLU_FUNC( Object, create )( &cfg );
         
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[3];
-        ID_Addr[3] = GUI_object_create( &cfg );
+        ID_Addr[3] = GLU_FUNC( Object, create )( &cfg );
         
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[4];
-        ID_Addr[4] = GUI_object_create( &cfg );
+        ID_Addr[4] = GLU_FUNC( Object, create )( &cfg );
         
         cfg.widget      = kGUI_ObjStyle_text;
         cfg.area.ys   -= cfg.area.height;
@@ -579,30 +580,30 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
         cfg.text_align  = kGUI_FontAlign_Left;
         cfg.obj_color   = M_COLOR_WHITE;
         cfg.text_size   = 8;
-        ID_Text         = GUI_object_create( &cfg );
+        ID_Text         = GLU_FUNC( Object, create )( &cfg );
     }
     
-    GUI_object_insert( ID_Text    );
-    GUI_object_insert( ID_Addr[0] );
-    GUI_object_insert( ID_Addr[1] );
-    GUI_object_insert( ID_Addr[2] );
-    GUI_object_insert( ID_Addr[3] );
-    GUI_object_insert( ID_Addr[4] );
+    GLU_FUNC( Object, insert )( ID_Text    );
+    GLU_FUNC( Object, insert )( ID_Addr[0] );
+    GLU_FUNC( Object, insert )( ID_Addr[1] );
+    GLU_FUNC( Object, insert )( ID_Addr[2] );
+    GLU_FUNC( Object, insert )( ID_Addr[3] );
+    GLU_FUNC( Object, insert )( ID_Addr[4] );
 
     __GUI_ObjDataScr_num data = {0};
 
     data.value = p->Addr[0];
-    GUI_object_adjust( ID_Addr[0], &data, sizeof(data) );
+    GLU_FUNC( Object, adjust )( ID_Addr[0], &data, sizeof(data) );
     data.value = p->Addr[1];
-    GUI_object_adjust( ID_Addr[1], &data, sizeof(data) );
+    GLU_FUNC( Object, adjust )( ID_Addr[1], &data, sizeof(data) );
     data.value = p->Addr[2];
-    GUI_object_adjust( ID_Addr[2], &data, sizeof(data) );
+    GLU_FUNC( Object, adjust )( ID_Addr[2], &data, sizeof(data) );
     data.value = p->Addr[3];
-    GUI_object_adjust( ID_Addr[3], &data, sizeof(data) );
+    GLU_FUNC( Object, adjust )( ID_Addr[3], &data, sizeof(data) );
     data.value = p->Addr[4];
-    GUI_object_adjust( ID_Addr[4], &data, sizeof(data) );
+    GLU_FUNC( Object, adjust )( ID_Addr[4], &data, sizeof(data) );
 
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
 
 /*====================================================================
@@ -618,19 +619,19 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
         }
 
         if( xResult&kHWEvent_JoySitck_Left ){
-            GUI_object_frame( ID_Addr[p->bucket+1], false );
-            GUI_object_frame( ID_Addr[p->bucket  ], true  );
+            GLU_FUNC( Object, frame )( ID_Addr[p->bucket+1], false );
+            GLU_FUNC( Object, frame )( ID_Addr[p->bucket  ], true  );
             xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left   );
         }else if( xResult&kHWEvent_JoySitck_Right ){
-            GUI_object_frame( ID_Addr[p->bucket  ], true  );
-            GUI_object_frame( ID_Addr[p->bucket-1], false );
+            GLU_FUNC( Object, frame )( ID_Addr[p->bucket  ], true  );
+            GLU_FUNC( Object, frame )( ID_Addr[p->bucket-1], false );
             xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Right );
         }
         
         if( (xResult&kHWEvent_JoySitck_Up) || (xResult&kHWEvent_JoySitck_Down) ){
             for( int i=0; i<p->size; i++ ){
                 __GUI_ObjDataScr_num data = { .value = p->Addr[i] };
-                GUI_object_adjust( ID_Addr[i], &data, sizeof(data) );
+                GLU_FUNC( Object, adjust )( ID_Addr[i], &data, sizeof(data) );
             }
 
             xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up   );
@@ -639,19 +640,19 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
 
         
         taskENTER_CRITICAL();
-        GUI_RefreashScreen();
+        GLU_FUNC( GUI, refreashScreen )();
         taskEXIT_CRITICAL();
     }
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_object_delete( ID_Addr[0] );
-    GUI_object_delete( ID_Addr[1] );
-    GUI_object_delete( ID_Addr[2] );
-    GUI_object_delete( ID_Addr[3] );
-    GUI_object_delete( ID_Addr[4] );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Object, delete )( ID_Addr[0] );
+    GLU_FUNC( Object, delete )( ID_Addr[1] );
+    GLU_FUNC( Object, delete )( ID_Addr[2] );
+    GLU_FUNC( Object, delete )( ID_Addr[3] );
+    GLU_FUNC( Object, delete )( ID_Addr[4] );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -762,7 +763,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
     ID_t ID_Num_X, ID_Num_Y, ID_Text_X, ID_Text_Y = 0;
     {
         __GUI_Object_t cfg = {0};
-        GUI_object_template( &cfg, kGUI_ObjStyle_joystick );
+        GLU_FUNC( Object, template )( &cfg, kGUI_ObjStyle_joystick );
         cfg.area.xs     = 10;
         cfg.area.ys     = 10;
         cfg.area.height = 45;
@@ -776,7 +777,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
         cfg.showFrame   = true;
         cfg.obj_color   = M_COLOR_WHITE;
         cfg.bk_color    = M_COLOR_BLACK;
-        ID_JoyStick     = GUI_object_create( &cfg );
+        ID_JoyStick     = GLU_FUNC( Object, create )( &cfg );
 
         cfg.widget       = kGUI_ObjStyle_num;
         cfg.area.xs     = 90;
@@ -788,28 +789,28 @@ void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
         cfg.text_size   = 8;
         cfg.text_align  = kGUI_FontAlign_Middle;
         cfg.showFrame   = true;
-        ID_Num_X        = GUI_object_create( &cfg );
+        ID_Num_X        = GLU_FUNC( Object, create )( &cfg );
         
         cfg.area.ys    += cfg.area.height;
-        ID_Num_Y        = GUI_object_create( &cfg );
+        ID_Num_Y        = GLU_FUNC( Object, create )( &cfg );
         
         cfg.widget       = kGUI_ObjStyle_text;
             
         cfg.area.width  = 10;
         cfg.area.xs    -= cfg.area.width-1;
         cfg.text        = "Y";
-        ID_Text_Y       = GUI_object_create( &cfg );
+        ID_Text_Y       = GLU_FUNC( Object, create )( &cfg );
         
         cfg.area.ys    -= cfg.area.height;
         cfg.text        = "X";
-        ID_Text_X       = GUI_object_create( &cfg );
+        ID_Text_X       = GLU_FUNC( Object, create )( &cfg );
     }
     
-    GUI_object_insert(ID_JoyStick);
-    GUI_object_insert(ID_Num_X);
-    GUI_object_insert(ID_Num_Y);
-    GUI_object_insert(ID_Text_X);
-    GUI_object_insert(ID_Text_Y);
+    GLU_FUNC( Object, insert )(ID_JoyStick);
+    GLU_FUNC( Object, insert )(ID_Num_X);
+    GLU_FUNC( Object, insert )(ID_Num_Y);
+    GLU_FUNC( Object, insert )(ID_Text_X);
+    GLU_FUNC( Object, insert )(ID_Text_Y);
     
 /*====================================================================
  * Loop  子任务循环体
@@ -826,28 +827,28 @@ void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
             .max      = { 4096, 4096 },
             .min      = {    0,    0 }
         };
-        GUI_object_adjust(ID_JoyStick, &objdata_joystick, sizeof(objdata_joystick));
+        GLU_FUNC( Object, adjust )(ID_JoyStick, &objdata_joystick, sizeof(objdata_joystick));
         
         // UI显示X方向的ADC数据
         __GUI_ObjDataScr_num   objdata_adc = {
             .value = objdata_joystick.value[0]
         };
-        GUI_object_adjust(ID_Num_X, &objdata_adc, sizeof(objdata_adc));
+        GLU_FUNC( Object, adjust )(ID_Num_X, &objdata_adc, sizeof(objdata_adc));
 
         // UI显示Y方向的ADC数据
         objdata_adc.value = objdata_joystick.value[1];
-        GUI_object_adjust(ID_Num_Y, &objdata_adc, sizeof(objdata_adc));
+        GLU_FUNC( Object, adjust )(ID_Num_Y, &objdata_adc, sizeof(objdata_adc));
 
-        GUI_RefreashScreen();
+        GLU_FUNC( GUI, refreashScreen )();
         
         vTaskDelay(10);
     }
-    GUI_object_delete( ID_JoyStick );
-    GUI_object_delete( ID_Num_X    );
-    GUI_object_delete( ID_Num_Y    );
-    GUI_object_delete( ID_Text_X   );
-    GUI_object_delete( ID_Text_Y   );
-    GUI_RefreashScreen();
+    GLU_FUNC( Object, delete )( ID_JoyStick );
+    GLU_FUNC( Object, delete )( ID_Num_X    );
+    GLU_FUNC( Object, delete )( ID_Num_Y    );
+    GLU_FUNC( Object, delete )( ID_Text_X   );
+    GLU_FUNC( Object, delete )( ID_Text_Y   );
+    GLU_FUNC( GUI, refreashScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     while(1);
 }
@@ -882,7 +883,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_template( &cfg, kGUI_ObjStyle_switch );
+        GLU_FUNC( Object, template )( &cfg, kGUI_ObjStyle_switch );
 
         cfg.area.xs     = 72;
         cfg.area.ys     = 20;
@@ -895,14 +896,14 @@ void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
         cfg.obj_color   = M_COLOR_WHITE;
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Switch = GUI_object_create(&cfg);
+        ID_Switch = GLU_FUNC( Object, create )(&cfg);
     }
     
     // Config [ Text ]
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_template( &cfg, kGUI_ObjStyle_text );
+        GLU_FUNC( Object, template )( &cfg, kGUI_ObjStyle_text );
 
         cfg.area.xs     = 20;
         cfg.area.ys     = 20;
@@ -917,13 +918,13 @@ void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
 
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Text = GUI_object_create( &cfg );
+        ID_Text = GLU_FUNC( Object, create )( &cfg );
         
     }
 
-    GUI_object_insert ( ID_Switch );
-    GUI_object_insert ( ID_Text   );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Object, insert ) ( ID_Switch );
+    GLU_FUNC( Object, insert ) ( ID_Text   );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
     
     int ans = 0;
@@ -949,16 +950,16 @@ void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
         __GUI_ObjDataScr_switch objdata_switch = {
             .cmd = (bool)ans
         };
-        GUI_object_adjust( ID_Switch, &objdata_switch, sizeof(objdata_switch) );
-        GUI_RefreashScreen();
+        GLU_FUNC( Object, adjust )( ID_Switch, &objdata_switch, sizeof(objdata_switch) );
+        GLU_FUNC( GUI, refreashScreen )();
         taskEXIT_CRITICAL();
     }
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_object_delete( ID_Switch );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Object, delete )( ID_Switch );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -1022,7 +1023,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_template( &cfg, kGUI_ObjStyle_switch );
+        GLU_FUNC( Object, template )( &cfg, kGUI_ObjStyle_switch );
         cfg.area.xs     = 72;
         cfg.area.ys     = 20;
         cfg.area.height = 12;
@@ -1032,14 +1033,14 @@ void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
         cfg.bk_color    = M_COLOR_BLACK;
 
     
-        ID_Switch = GUI_object_create(&cfg);
+        ID_Switch = GLU_FUNC( Object, create )(&cfg);
     }
     
     // Config [ Text ]
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_template( &cfg, kGUI_ObjStyle_text );
+        GLU_FUNC( Object, template )( &cfg, kGUI_ObjStyle_text );
 
         cfg.area.xs     = 20;
         cfg.area.ys     = 20;
@@ -1054,13 +1055,13 @@ void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
 
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Text = GUI_object_create( &cfg );
+        ID_Text = GLU_FUNC( Object, create )( &cfg );
         
     }
 
-    GUI_object_insert ( ID_Switch );
-    GUI_object_insert ( ID_Text   );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Object, insert ) ( ID_Switch );
+    GLU_FUNC( Object, insert ) ( ID_Text   );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
     
     int ans = 0;
@@ -1087,16 +1088,16 @@ void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
         __GUI_ObjDataScr_switch objdata_switch = {
             .cmd = (bool)ans
         };
-        GUI_object_adjust( ID_Switch, &objdata_switch, sizeof(objdata_switch) );
-        GUI_RefreashScreen();
+        GLU_FUNC( Object, adjust )( ID_Switch, &objdata_switch, sizeof(objdata_switch) );
+        GLU_FUNC( GUI, refreashScreen )();
         taskEXIT_CRITICAL();
     }
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_object_delete( ID_Switch );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Object, delete )( ID_Switch );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -1185,11 +1186,11 @@ void MAKE_TASK( subtask, ROOT_Game_Manila, UI   ) ( void* param ){
         }
         cfg.menuList = m;
     
-        ID_Menu = GUI_menu_create(&cfg);
+        ID_Menu = GLU_FUNC( Menu, create )(&cfg);
     }
-    GUI_menu_frame  ( ID_Menu, 0 );
-    GUI_menu_insert ( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, frame )  ( ID_Menu, 0 );
+    GLU_FUNC( Menu, insert ) ( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
 
 /*====================================================================
@@ -1211,16 +1212,16 @@ void MAKE_TASK( subtask, ROOT_Game_Manila, UI   ) ( void* param ){
         else                                       ans =  0;
         
         taskENTER_CRITICAL();
-        GUI_menu_scroll( ID_Menu, ans );
-        GUI_RefreashEntireScreen();
+        GLU_FUNC( Menu, scroll )( ID_Menu, ans );
+        GLU_FUNC( GUI, refreashEntireScreen )();
         taskEXIT_CRITICAL();
     }
 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_menu_delete( ID_Menu );
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( Menu, delete )( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -1322,40 +1323,40 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
     // ID_t ID_DiceRound_num = 0;
     __GUI_Object_t cfg = {0};
 
-    GUI_object_template( &cfg, kGUI_ObjStyle_trunk );
+    GLU_FUNC( Object, template )( &cfg, kGUI_ObjStyle_trunk );
     cfg.obj_color  = M_COLOR_WHITE;
     cfg.area.xs    = 10;
     cfg.area.ys    = 3;
     cfg.area.width = 14;
     
-    ID_Objects[0] = GUI_object_create( &cfg );
+    ID_Objects[0] = GLU_FUNC( Object, create )( &cfg );
     cfg.area.xs  += cfg.area.width+2;
-    ID_Objects[1] = GUI_object_create( &cfg );
+    ID_Objects[1] = GLU_FUNC( Object, create )( &cfg );
     cfg.area.xs  += cfg.area.width+2;
-    ID_Objects[2] = GUI_object_create( &cfg );
+    ID_Objects[2] = GLU_FUNC( Object, create )( &cfg );
     
-    GUI_object_insert( ID_Objects[0] );
-    GUI_object_insert( ID_Objects[1] );
-    GUI_object_insert( ID_Objects[2] );
+    GLU_FUNC( Object, insert )( ID_Objects[0] );
+    GLU_FUNC( Object, insert )( ID_Objects[1] );
+    GLU_FUNC( Object, insert )( ID_Objects[2] );
     {
         __GUI_ObjDataScr_trunk data = {
             .min   = 0,
             .max   = 14,
             .value = cache->boat_info[0].pos 
         };
-        GUI_object_adjust( ID_Objects[0], &data, sizeof(data));
+        GLU_FUNC( Object, adjust )( ID_Objects[0], &data, sizeof(data));
         
         data.value = cache->boat_info[1].pos; 
-        GUI_object_adjust( ID_Objects[1], &data, sizeof(data));
+        GLU_FUNC( Object, adjust )( ID_Objects[1], &data, sizeof(data));
 
         data.value = cache->boat_info[2].pos;
-        GUI_object_adjust( ID_Objects[2], &data, sizeof(data));
+        GLU_FUNC( Object, adjust )( ID_Objects[2], &data, sizeof(data));
     }
 
-    GUI_set_penColor(M_COLOR_WHITE);
-    GUI_line_raw(67, 7, 67, 57);
+    GLU_FUNC( GUI, setPenColor )(M_COLOR_WHITE);
+    GLU_FUNC( GUI, line_raw )(67, 7, 67, 57);
 
-    GUI_object_template(&cfg, kGUI_ObjStyle_text);
+    GLU_FUNC( Object, template )(&cfg, kGUI_ObjStyle_text);
     cfg.area.xs     = 10;
     cfg.area.ys     = 52;
     cfg.area.height = 12;
@@ -1363,20 +1364,20 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
     cfg.text        = pStrs[ cache->boat_info[ 0 ].shipment ];
     cfg.showFrame   = false;
     cfg.obj_color   = M_COLOR_WHITE;
-    ID_Objects[4] = GUI_object_create( &cfg );
+    ID_Objects[4] = GLU_FUNC( Object, create )( &cfg );
 
     cfg.text = pStrs[ cache->boat_info[ 1 ].shipment ];
     cfg.area.xs += cfg.area.width +2;
-    ID_Objects[5] = GUI_object_create( &cfg );
+    ID_Objects[5] = GLU_FUNC( Object, create )( &cfg );
 
     cfg.text = pStrs[ cache->boat_info[ 2 ].shipment ];
     cfg.area.xs += cfg.area.width +2;
-    ID_Objects[6] = GUI_object_create( &cfg );
-    GUI_object_insert( ID_Objects[4] );
-    GUI_object_insert( ID_Objects[5] );
-    GUI_object_insert( ID_Objects[6] );
+    ID_Objects[6] = GLU_FUNC( Object, create )( &cfg );
+    GLU_FUNC( Object, insert )( ID_Objects[4] );
+    GLU_FUNC( Object, insert )( ID_Objects[5] );
+    GLU_FUNC( Object, insert )( ID_Objects[6] );
 
-    GUI_object_frame(  ID_Objects[0], true);
+    GLU_FUNC( Object, frame )(  ID_Objects[0], true);
     
     cfg.text         = "Round:";
     cfg.area.xs      = 73;
@@ -1384,24 +1385,24 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
     cfg.area.height  = 11;
     cfg.area.width   = strlen(cfg.text)*6+2;
     cfg.showFrame    = false;
-    ID_Objects[7]    = GUI_object_create( &cfg );
+    ID_Objects[7]    = GLU_FUNC( Object, create )( &cfg );
     
     cfg.widget       = kGUI_ObjStyle_num;
     cfg.area.xs     += cfg.area.width;
     cfg.area.width   = 7;
-    ID_Objects[3]    = GUI_object_create( &cfg );
+    ID_Objects[3]    = GLU_FUNC( Object, create )( &cfg );
     
     
-    GUI_object_insert( ID_Objects[7] );
-    GUI_object_insert( ID_Objects[3] );
+    GLU_FUNC( Object, insert )( ID_Objects[7] );
+    GLU_FUNC( Object, insert )( ID_Objects[3] );
     {
         __GUI_ObjDataScr_num data = {
             .value = cache->round
         };
-        GUI_object_adjust( ID_Objects[3], &data, sizeof(data) );
+        GLU_FUNC( Object, adjust )( ID_Objects[3], &data, sizeof(data) );
     }
     
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( GUI, refreashEntireScreen )();
 
 
     EventBits_t xResult;
@@ -1424,8 +1425,8 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
         }
 
         if( idx != cache->idx ){
-            GUI_object_frame( ID_Objects[ idx        ], false );
-            GUI_object_frame( ID_Objects[ cache->idx ], true  );            
+            GLU_FUNC( Object, frame )( ID_Objects[ idx        ], false );
+            GLU_FUNC( Object, frame )( ID_Objects[ cache->idx ], true  );            
             idx = cache->idx;
         }
  
@@ -1438,14 +1439,14 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
                 .max   = M_MANILA_BOATPOS_MAX,
                 .min   = 0,
             };
-            GUI_object_adjust( ID_Objects[ cache->idx ], &data, sizeof(data) );
+            GLU_FUNC( Object, adjust )( ID_Objects[ cache->idx ], &data, sizeof(data) );
             break; 
         }
         case 3:{ // Round
             __GUI_ObjDataScr_num data = {
                 .value = cache->round
             };
-            GUI_object_adjust( ID_Objects[ cache->idx ], &data, sizeof(data) );
+            GLU_FUNC( Object, adjust )( ID_Objects[ cache->idx ], &data, sizeof(data) );
             break;
         }
         case 4: // Name A
@@ -1454,7 +1455,7 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
             __GUI_ObjDataScr_text data = {
                 .text = pStrs[ cache->boat_info[ cache->idx-4 ].shipment ]
             };
-            GUI_object_adjust( ID_Objects[ cache->idx ], &data, sizeof(data) );
+            GLU_FUNC( Object, adjust )( ID_Objects[ cache->idx ], &data, sizeof(data) );
             break;  
         }          
         
@@ -1465,7 +1466,7 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
                                                   kHWEvent_JoySitck_Down    );
         taskENTER_CRITICAL();
 
-        GUI_RefreashScreen();
+        GLU_FUNC( GUI, refreashScreen )();
         taskEXIT_CRITICAL();
     }
 
@@ -1475,13 +1476,13 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
     {
         int8_t cnt = sizeof(ID_Objects)/sizeof(*ID_Objects);
         while(cnt--)
-            GUI_object_delete( ID_Objects[cnt] );
+            GLU_FUNC( Object, delete )( ID_Objects[cnt] );
     }
     
     
-    GUI_set_penColor( M_COLOR_BLACK);
-    GUI_line_raw(67, 7, 67, 57);
-    GUI_RefreashEntireScreen();
+    GLU_FUNC( GUI, setPenColor )( M_COLOR_BLACK);
+    GLU_FUNC( GUI, line_raw )(67, 7, 67, 57);
+    GLU_FUNC( GUI, refreashEntireScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
@@ -1651,7 +1652,7 @@ void MAKE_TASK( subtask, default   , UI   )    ( void* param ){
     {
         __GUI_Object_t cfg = {0};
 
-        GUI_object_template( &cfg, kGUI_ObjStyle_text );
+        GLU_FUNC( Object, template )( &cfg, kGUI_ObjStyle_text );
         cfg.area.xs     = 30;
         cfg.area.ys     = 30;
         cfg.area.height = 12;
@@ -1665,12 +1666,12 @@ void MAKE_TASK( subtask, default   , UI   )    ( void* param ){
 
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Object = GUI_object_create( &cfg );
+        ID_Object = GLU_FUNC( Object, create )( &cfg );
         
     }
     
-    GUI_object_insert( ID_Object );
-    GUI_RefreashScreen();
+    GLU_FUNC( Object, insert )( ID_Object );
+    GLU_FUNC( GUI, refreashScreen )();
     
     EventBits_t xResult;
 
@@ -1691,8 +1692,8 @@ void MAKE_TASK( subtask, default   , UI   )    ( void* param ){
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
-    GUI_object_delete( ID_Object );
-    GUI_RefreashScreen();
+    GLU_FUNC( Object, delete )( ID_Object );
+    GLU_FUNC( GUI, refreashScreen )();
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
