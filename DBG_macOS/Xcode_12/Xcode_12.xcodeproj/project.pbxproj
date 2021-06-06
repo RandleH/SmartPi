@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E34784BE2664EE5E0099C119 /* RH_subtask.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784BB2664EE5E0099C119 /* RH_subtask.c */; };
-		E34784BF2664EE5E0099C119 /* RH_task.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784BC2664EE5E0099C119 /* RH_task.c */; };
 		E34784C42664EE9E0099C119 /* GLU_glucoo.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784C32664EE9E0099C119 /* GLU_glucoo.c */; };
 		E34784CA2664EEBC0099C119 /* GLU_object.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784C92664EEBC0099C119 /* GLU_object.c */; };
 		E34784D12664EF110099C119 /* GLU_menu.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784CF2664EF100099C119 /* GLU_menu.c */; };
@@ -24,13 +22,8 @@
 		E34784F72664EF770099C119 /* BLK_lib.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784EC2664EF760099C119 /* BLK_lib.c */; };
 		E34784F82664EF770099C119 /* BLK_graphic.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784EE2664EF770099C119 /* BLK_graphic.c */; };
 		E34784F92664EF770099C119 /* BLK_data.c in Sources */ = {isa = PBXBuildFile; fileRef = E34784EF2664EF770099C119 /* BLK_data.c */; };
-		E347853E2664F76B0099C119 /* led.c in Sources */ = {isa = PBXBuildFile; fileRef = E34785362664F76A0099C119 /* led.c */; };
-		E347853F2664F76B0099C119 /* joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = E34785372664F76A0099C119 /* joystick.c */; };
-		E34785402664F76B0099C119 /* nrf24l01.c in Sources */ = {isa = PBXBuildFile; fileRef = E34785392664F76A0099C119 /* nrf24l01.c */; };
-		E34785412664F76B0099C119 /* ssd1306.c in Sources */ = {isa = PBXBuildFile; fileRef = E347853A2664F76A0099C119 /* ssd1306.c */; };
-		E34785422664F76B0099C119 /* beeper.c in Sources */ = {isa = PBXBuildFile; fileRef = E347853C2664F76B0099C119 /* beeper.c */; };
 		E3CE11E5265F8642004E505F /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E3CE11E4265F8642004E505F /* main.c */; };
-		E3CE11F0265F87AF004E505F /* manila.c in Sources */ = {isa = PBXBuildFile; fileRef = E3CE11EF265F87AF004E505F /* manila.c */; };
+		E3E4DEEF26664670003E6ACF /* manila.c in Sources */ = {isa = PBXBuildFile; fileRef = E3E4DEEE26664670003E6ACF /* manila.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,9 +39,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		E34784BB2664EE5E0099C119 /* RH_subtask.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = RH_subtask.c; path = ../../core/SmartPi/RH_subtask.c; sourceTree = "<group>"; };
-		E34784BC2664EE5E0099C119 /* RH_task.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = RH_task.c; path = ../../core/SmartPi/RH_task.c; sourceTree = "<group>"; };
-		E34784BD2664EE5E0099C119 /* RH_task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RH_task.h; path = ../../core/SmartPi/RH_task.h; sourceTree = "<group>"; };
 		E34784C22664EE9E0099C119 /* GLU_glucoo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLU_glucoo.h; path = ../../core/Glucoo/GLU_glucoo.h; sourceTree = "<group>"; };
 		E34784C32664EE9E0099C119 /* GLU_glucoo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = GLU_glucoo.c; path = ../../core/Glucoo/GLU_glucoo.c; sourceTree = "<group>"; };
 		E34784C82664EEBC0099C119 /* GLU_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLU_object.h; path = ../../core/Glucoo/object/GLU_object.h; sourceTree = "<group>"; };
@@ -78,26 +68,13 @@
 		E34784EF2664EF770099C119 /* BLK_data.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BLK_data.c; path = ../../core/BlackHouse/BLK_data.c; sourceTree = "<group>"; };
 		E34784F02664EF770099C119 /* BLK_time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BLK_time.h; path = ../../core/BlackHouse/BLK_time.h; sourceTree = "<group>"; };
 		E34784FC2664EFAF0099C119 /* stb_truetype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stb_truetype.h; path = ../../core/STB/stb_truetype.h; sourceTree = "<group>"; };
-		E347852F2664F4BD0099C119 /* FreeRTOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FreeRTOS.h; path = ../../Libraries/FreeRTOS.h; sourceTree = "<group>"; };
-		E34785302664F4BD0099C119 /* event_groups.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event_groups.h; path = ../../Libraries/event_groups.h; sourceTree = "<group>"; };
-		E34785312664F4BD0099C119 /* task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = task.h; path = ../../Libraries/task.h; sourceTree = "<group>"; };
-		E34785342664F76A0099C119 /* beeper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = beeper.h; path = ../../BSP/beeper.h; sourceTree = "<group>"; };
-		E34785352664F76A0099C119 /* ssd1306.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ssd1306.h; path = ../../BSP/ssd1306.h; sourceTree = "<group>"; };
-		E34785362664F76A0099C119 /* led.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = led.c; path = ../../BSP/led.c; sourceTree = "<group>"; };
-		E34785372664F76A0099C119 /* joystick.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = joystick.c; path = ../../BSP/joystick.c; sourceTree = "<group>"; };
-		E34785382664F76A0099C119 /* joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = joystick.h; path = ../../BSP/joystick.h; sourceTree = "<group>"; };
-		E34785392664F76A0099C119 /* nrf24l01.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nrf24l01.c; path = ../../BSP/nrf24l01.c; sourceTree = "<group>"; };
-		E347853A2664F76A0099C119 /* ssd1306.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ssd1306.c; path = ../../BSP/ssd1306.c; sourceTree = "<group>"; };
-		E347853B2664F76B0099C119 /* led.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = led.h; path = ../../BSP/led.h; sourceTree = "<group>"; };
-		E347853C2664F76B0099C119 /* beeper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = beeper.c; path = ../../BSP/beeper.c; sourceTree = "<group>"; };
-		E347853D2664F76B0099C119 /* nrf24l01.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nrf24l01.h; path = ../../BSP/nrf24l01.h; sourceTree = "<group>"; };
 		E3CE11E1265F8642004E505F /* Xcode_12 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Xcode_12; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3CE11E4265F8642004E505F /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; wrapsLines = 0; };
-		E3CE11EE265F87AF004E505F /* manila.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = manila.h; path = ../../../core/SmartPi/project/game/manila.h; sourceTree = "<group>"; };
-		E3CE11EF265F87AF004E505F /* manila.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = manila.c; path = ../../../core/SmartPi/project/game/manila.c; sourceTree = "<group>"; };
 		E3CE11F3265F8850004E505F /* RH_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RH_common.h; path = ../../core/RH_common.h; sourceTree = "<group>"; };
 		E3CE11F4265F8850004E505F /* RH_color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RH_color.h; path = ../../core/RH_color.h; sourceTree = "<group>"; };
 		E3CE11F8265F88F8004E505F /* RH_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RH_config.h; path = ../self/RH_config.h; sourceTree = "<group>"; };
+		E3E4DEED2666466F003E6ACF /* manila.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = manila.h; path = ../../core/SmartPi/project/game/manila.h; sourceTree = "<group>"; };
+		E3E4DEEE26664670003E6ACF /* manila.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = manila.c; path = ../../core/SmartPi/project/game/manila.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,9 +91,7 @@
 		E34784B92664EE070099C119 /* SmartPi */ = {
 			isa = PBXGroup;
 			children = (
-				E34784BB2664EE5E0099C119 /* RH_subtask.c */,
-				E34784BC2664EE5E0099C119 /* RH_task.c */,
-				E34784BD2664EE5E0099C119 /* RH_task.h */,
+				E3E4DEEB26664658003E6ACF /* project */,
 			);
 			name = SmartPi;
 			sourceTree = "<group>";
@@ -203,45 +178,15 @@
 			name = STB;
 			sourceTree = "<group>";
 		};
-		E347852E2664F49D0099C119 /* freeRTOS( virtual ) */ = {
-			isa = PBXGroup;
-			children = (
-				E34785302664F4BD0099C119 /* event_groups.h */,
-				E347852F2664F4BD0099C119 /* FreeRTOS.h */,
-				E34785312664F4BD0099C119 /* task.h */,
-			);
-			path = "freeRTOS( virtual )";
-			sourceTree = "<group>";
-		};
-		E34785332664F6F10099C119 /* BSP */ = {
-			isa = PBXGroup;
-			children = (
-				E347853C2664F76B0099C119 /* beeper.c */,
-				E34785342664F76A0099C119 /* beeper.h */,
-				E34785372664F76A0099C119 /* joystick.c */,
-				E34785382664F76A0099C119 /* joystick.h */,
-				E34785362664F76A0099C119 /* led.c */,
-				E347853B2664F76B0099C119 /* led.h */,
-				E34785392664F76A0099C119 /* nrf24l01.c */,
-				E347853D2664F76B0099C119 /* nrf24l01.h */,
-				E347853A2664F76A0099C119 /* ssd1306.c */,
-				E34785352664F76A0099C119 /* ssd1306.h */,
-			);
-			path = BSP;
-			sourceTree = "<group>";
-		};
 		E3CE11D8265F8642004E505F = {
 			isa = PBXGroup;
 			children = (
-				E34785332664F6F10099C119 /* BSP */,
-				E347852E2664F49D0099C119 /* freeRTOS( virtual ) */,
 				E34784FB2664EF9F0099C119 /* STB */,
 				E34784DE2664EF5F0099C119 /* BlackHouse */,
 				E34784C12664EE860099C119 /* Glucoo */,
 				E34784B92664EE070099C119 /* SmartPi */,
 				E3CE11F6265F88E6004E505F /* Self */,
 				E3CE11F2265F8840004E505F /* Common */,
-				E3CE11ED265F8791004E505F /* Manila */,
 				E3CE11E3265F8642004E505F /* Xcode_12 */,
 				E3CE11E2265F8642004E505F /* Products */,
 			);
@@ -263,15 +208,6 @@
 			path = Xcode_12;
 			sourceTree = "<group>";
 		};
-		E3CE11ED265F8791004E505F /* Manila */ = {
-			isa = PBXGroup;
-			children = (
-				E3CE11EF265F87AF004E505F /* manila.c */,
-				E3CE11EE265F87AF004E505F /* manila.h */,
-			);
-			path = Manila;
-			sourceTree = "<group>";
-		};
 		E3CE11F2265F8840004E505F /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -287,6 +223,23 @@
 				E3CE11F8265F88F8004E505F /* RH_config.h */,
 			);
 			name = Self;
+			sourceTree = "<group>";
+		};
+		E3E4DEEB26664658003E6ACF /* project */ = {
+			isa = PBXGroup;
+			children = (
+				E3E4DEEC26664660003E6ACF /* game */,
+			);
+			name = project;
+			sourceTree = "<group>";
+		};
+		E3E4DEEC26664660003E6ACF /* game */ = {
+			isa = PBXGroup;
+			children = (
+				E3E4DEEE26664670003E6ACF /* manila.c */,
+				E3E4DEED2666466F003E6ACF /* manila.h */,
+			);
+			name = game;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -349,26 +302,19 @@
 				E34784F52664EF770099C119 /* BLK_poker.c in Sources */,
 				E34784F62664EF770099C119 /* BLK_time.c in Sources */,
 				E34784F12664EF770099C119 /* BLK_utility.c in Sources */,
-				E34785422664F76B0099C119 /* beeper.c in Sources */,
 				E34784F32664EF770099C119 /* BLK_image.c in Sources */,
 				E34784C42664EE9E0099C119 /* GLU_glucoo.c in Sources */,
 				E34784F82664EF770099C119 /* BLK_graphic.c in Sources */,
 				E34784F72664EF770099C119 /* BLK_lib.c in Sources */,
 				E34784D82664EF360099C119 /* GLU_font.c in Sources */,
-				E34784BE2664EE5E0099C119 /* RH_subtask.c in Sources */,
 				E34784F22664EF770099C119 /* BLK_math.c in Sources */,
-				E347853E2664F76B0099C119 /* led.c in Sources */,
 				E34784F92664EF770099C119 /* BLK_data.c in Sources */,
 				E34784F42664EF770099C119 /* BLK_dsp.c in Sources */,
-				E34785402664F76B0099C119 /* nrf24l01.c in Sources */,
-				E34785412664F76B0099C119 /* ssd1306.c in Sources */,
 				E3CE11E5265F8642004E505F /* main.c in Sources */,
 				E34784D72664EF360099C119 /* GLU_font_ArialRoundedBold.c in Sources */,
+				E3E4DEEF26664670003E6ACF /* manila.c in Sources */,
 				E34784DC2664EF4F0099C119 /* GLU_draw.c in Sources */,
-				E347853F2664F76B0099C119 /* joystick.c in Sources */,
 				E34784CA2664EEBC0099C119 /* GLU_object.c in Sources */,
-				E34784BF2664EE5E0099C119 /* RH_task.c in Sources */,
-				E3CE11F0265F87AF004E505F /* manila.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

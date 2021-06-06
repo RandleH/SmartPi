@@ -47,13 +47,15 @@ typedef enum{
 
 struct __SmartPiService_t{
     E_TaskID_t          serv_ID;         // 当前业务号
-    BLK_SRCT(Stack)*  serv_ID_Stack;   // 业务栈
+    BLK_SRCT(Stack)*    serv_ID_Stack;   // 业务栈
     volatile uint32_t   serv_ID_tmp;     // 临时预选业务号
 
-    int8_t            numOfNextNodes;  
+    int8_t              numOfNextNodes;  
+
+    uint8_t*            radio_data;     
     
-    bool              enter;
-    volatile bool     exit;
+    bool                enter;
+    volatile bool       exit;
     
     int8_t            cache_task_num;    
     TaskHandle_t*     cache_task_handle;
@@ -64,21 +66,25 @@ typedef struct __SmartPiService_t __SmartPiService_t;
 extern __SmartPiService_t SmartPi;
 
 typedef enum{
-    kHWEvent_JoySitck_Pressed  = (1<<0),   // 0
-    kHWEvent_JoySitck_Up       = (1<<1),   // 1
-    kHWEvent_JoySitck_Down     = (1<<2),   // 2
-    kHWEvent_JoySitck_Left     = (1<<3),   // 3
-    kHWEvent_JoySitck_Right    = (1<<4),   // 4
+    kHWEvent_JoySitck_Pressed    = (1<<0),   // 0
+    kHWEvent_JoySitck_Up         = (1<<1),   // 1
+    kHWEvent_JoySitck_Down       = (1<<2),   // 2
+    kHWEvent_JoySitck_Left       = (1<<3),   // 3
+    kHWEvent_JoySitck_Right      = (1<<4),   // 4
 
-    kHWEvent_NRF24L01_Offline  = (1<<5),   // 5
-    kHWEvent_NRF24L01_Recved   = (1<<6),   // 6
-    kHWEvent_NRF24L01_Sent     = (1<<7),   // 7
+    kHWEvent_NRF24L01_Offline    = (1<<5),   // 5
+    kHWEvent_NRF24L01_RecvReady  = (1<<6),   // 6
+    kHWEvent_NRF24L01_RecvFailed = (1<<7),   // 7
+    kHWEvent_NRF24L01_RecvDone   = (1<<8),   // 8 
+    kHWEvent_NRF24L01_SendReady  = (1<<9),   // 9
+    kHWEvent_NRF24L01_SendFailed = (1<<10),  // 10
+    kHWEvent_NRF24L01_SendDone   = (1<<11),  // 11
 
-    kHWEvent_USART_Recved      = (1<<8),   // 8
-    kHWEvent_USART_Sent        = (1<<9),   // 9
+    kHWEvent_USART_Recved        = (1<<12),  // 12
+    kHWEvent_USART_Sent          = (1<<13),  // 13
 
-    kHWEvent_USB_PlugIn        = (1<<10),  // 10
-    kHWEvent_USB_PlugOut       = (1<<11),  // 11
+    kHWEvent_USB_PlugIn          = (1<<14),  // 14
+    kHWEvent_USB_PlugOut         = (1<<15),  // 15
     
 }E_HWEvent_t;
 

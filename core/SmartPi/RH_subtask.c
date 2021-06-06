@@ -1724,7 +1724,59 @@ void MAKE_TASK( subtask, default   , CTRL )    ( void* param ){
 =====================================================================*/
     xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
     while(1);
+} 
+
+#include "nrf24l01.h"
+void MAKE_TASK( subtask, radio, recv ) ( void* param ){
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    while(1){
+
+        uint8_t cnt  = 10;  // 最大重收发次数
+        uint8_t size = 32;  // 数据包大小 32字节
+        if( SmartPi.radio_data ){
+            RH_FREE( SmartPi.radio_data );
+        }
+        SmartPi.radio_data = RH_CALLOC( size, 1 );
+    #ifdef RH_DEBUG
+        RH_ASSERT( SmartPi.radio_data );
+    #endif
+        while( --cnt &&  0!=NRF24L01_recv( SmartPi.radio_data, size ));
+
+        if( !cnt ){
+            xEventGroupSetBits( EGHandle_Hardware , kHWEvent_NRF24L01_RecvFailed );
+        }else{
+            xEventGroupSetBits( EGHandle_Hardware , kHWEvent_NRF24L01_RecvDone );
+        }
+
+        vTaskDelete(NULL);
+        while(1);
+    }
 }
+
+void MAKE_TASK( subtask, radio, send ) ( void* param ){
+    while(1){
+        vTaskDelete(NULL);
+    }
+}
+
+void MAKE_TASK( subtask, radio, check ) ( void* param ){
+    while(1){
+        vTaskDelay(100);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

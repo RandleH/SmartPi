@@ -412,6 +412,15 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
     }
 
     taskEXIT_CRITICAL();
+
+/*====================================================================
+ * Process 数据处理
+=====================================================================*/
+    if( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RXAddress ){
+        NRF24L01_setRXAddr( 0, param.Addr, sizeof(param.Addr) );
+    }else if( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_TXAddress ){
+        NRF24L01_setTXAddr( param.Addr, sizeof(param.Addr) );
+    }
     
 /*====================================================================
  * Next  进入下一业务
@@ -680,7 +689,12 @@ case ROOT_Game_Manila_ShipDiagram:{
     taskENTER_CRITICAL();
     SmartPi.deleteSubtask();
     taskEXIT_CRITICAL();
-    
+
+/*====================================================================
+ * Work  计算任务
+=====================================================================*/    
+    SMP_Proj_Manila_analyze();
+
 /*====================================================================
  * Back  返回上一业务
 =====================================================================*/
@@ -730,28 +744,46 @@ default:{
 /*====================================================================
  * SmartPi 主任务(无线电检查)
 =====================================================================*/
-static StaticTask_t   Task_TCB_radiock;
-static StackType_t    Task_Stack_radiock[64];
-void __TaskStatic_radio_check( void* param ){
+static StaticTask_t   Task_TCB_radio;
+static StackType_t    Task_Stack_radio[64];
+
+extern void MAKE_TASK( subtask, radio, recv  ) ( void* param );
+extern void MAKE_TASK( subtask, radio, send  ) ( void* param );
+extern void MAKE_TASK( subtask, radio, check ) ( void* param );
+void __TaskStatic_radio( void* param ){
+
     while(1){
-        vTaskDelay(10);
+
+        xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_NRF24L01_RecvReady  | \
+                                                kHWEvent_NRF24L01_SendReady  | \
+                                                kHWEvent_NRF24L01_SendFailed | \
+                                                kHWEvent_NRF24L01_RecvFailed | \
+                                                kHWEvent_NRF24L01_Offline,
+                                   pdFALSE,         // 清除该位
+                                   pdFALSE,         // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
+
+        EventBits_t xResult = xEventGroupGetBits( EGHandle_Hardware );
+        
+        // 准备接收消息
+        if( xResult&kHWEvent_NRF24L01_RecvReady ){
+            //...// 还需要检查radio模式
+            TaskHandle_t task_handle_radioRecv;
+            RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, radio, recv ) , NULL, 256, NULL, 3, &task_handle_radioRecv ));
+            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_NRF24L01_RecvReady );
+        }
+        
+        // 准备发送消息
+        if( xResult&kHWEvent_NRF24L01_SendReady ){
+            //...// 还需要检查radio模式
+            TaskHandle_t task_handle_radioSend;
+            RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, radio, send ) , NULL, 256, NULL, 3, &task_handle_radioSend ));
+            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_NRF24L01_SendReady );
+        }
+
     }
 }
 
-void __Task_radio_recv( void* param ){
-    while(1){
-
-        vTaskDelete( NULL );
-    }
-}
-
-void __Task_radio_sent( void* param ){
-    while(1){
-
-        vTaskDelay(10);
-        vTaskDelete( NULL );
-    }
-}
 
 
 /*====================================================================
@@ -769,22 +801,20 @@ void __TaskStatic_led_heart( void* param ){
     }
 }
 
-
 void __Task_init( void ){
     NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
     THandle_main        = xTaskCreateStatic( __TaskStatic_main         , \
-                                            "__TaskStatic_main"        , \
+                                            "__T_main"        , \
                                             sizeof( Task_Stack_main      ), NULL, 4, Task_Stack_main     , &Task_TCB_main      );
 
-    THandle_radio_check = xTaskCreateStatic( __TaskStatic_radio_check  , \
-                                            "__TaskStatic_radio_check" , \
-                                            sizeof( Task_Stack_radiock   ), NULL, 4, Task_Stack_radiock  , &Task_TCB_radiock   );
+    THandle_radio_check = xTaskCreateStatic( __TaskStatic_radio  , \
+                                            "__T_radio" , \
+                                            sizeof( Task_Stack_radio   ), NULL, 4, Task_Stack_radio  , &Task_TCB_radio   );
 
     THandle_led_heart   = xTaskCreateStatic( __TaskStatic_led_heart    , \
-                                            "__TaskStatic_led_heart"   , \
+                                            "__T_led_heart"   , \
                                             sizeof( Task_Stack_led_heart ), NULL, 4, Task_Stack_led_heart, &Task_TCB_led_heart );
     
-//    memset( &SmartPi, 0, sizeof(SmartPi) );
 
     SmartPi.serv_ID_Stack = BLK_FUNC( Stack, createBase )( NULL );
 #ifdef RH_DEBUG    

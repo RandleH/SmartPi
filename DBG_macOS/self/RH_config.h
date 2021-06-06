@@ -79,6 +79,7 @@ extern "C" {
 // Select or use your own function.
 
 #ifndef RH_ASSERT
+
   #define RH_ASSERT( expr )                   assert( expr )
   #define STBTT_assert( expr )                RH_ASSERT( expr )
 #else
@@ -103,7 +104,28 @@ extern "C" {
   #error " 'RH_FREE' has been defined. "
 #endif
 
+#define BLK_POKER_CALLOC(x,s)          RH_CALLOC(x,s)
+#define BLK_POKER_MALLOC(x)            RH_MALLOC(x)
+#define BLK_POKER_FREE(x)              RH_FREE(x)
+#define BLK_POKER_ASSERT(expr)         RH_ASSERT(expr)
 
+#define BLK_DATA_CALLOC(x,s)           RH_CALLOC(x,s)
+#define BLK_DATA_MALLOC(x)             RH_MALLOC(x)
+#define BLK_DATA_FREE(x)               RH_FREE(x)
+#define BLK_DATA_ASSERT(expr)          RH_ASSERT(expr)
+#define BLK_DATA_HASH_CALLOC(x,s)      RH_CALLOC(x,s)
+#define BLK_DATA_HASH_MALLOC(x)        RH_MALLOC(x)
+#define BLK_DATA_HASH_FREE(x)          RH_FREE(x)
+
+#define BLK_DSP_CALLOC(x,s)            RH_CALLOC(x,s)
+#define BLK_DSP_MALLOC(x)              RH_MALLOC(x)
+#define BLK_DSP_FREE(x)                RH_FREE(x)
+#define BLK_DSP_ASSERT(expr)           RH_ASSERT(expr)
+
+#define BLK_GRAPH_CALLOC(x,s)          RH_CALLOC(x,s)
+#define BLK_GRAPH_MALLOC(x)            RH_MALLOC(x)
+#define BLK_GRAPH_FREE(x)              RH_FREE(x)
+#define BLK_GRAPH_ASSERT(expr)         RH_ASSERT(expr)
 
 
 #ifdef __cplusplus

@@ -175,15 +175,23 @@ void SysTick_Handler(void)
 #include "RH_task.h"
 
 #define EXTI_OK_LINE             EXTI_Line7
+#define EXTI_OK_GPIO             GPIOA
+#define EXTI_OK_PIN              GPIO_Pin_7
 
 #define JOYSTICK_IRQHandler      EXTI9_5_IRQHandler
 
-void JOYSTICK_IRQHandler(void){
+#define NRF_LINE                 EXTI_Line5
+#define NRF_IRQn                 EXTI9_5_IRQn
+#define NRF_PIN_IRQ              GPIO_Pin_5 
+#define NRF_GPIO_IRQ             GPIOB
+
+
+void EXTI9_5_IRQHandler(void){
     BaseType_t    xResult;
     BaseType_t    xHigherPriorityTaskWoken = pdFALSE;
 
-// xTimerPendFunctionCallFromISR
-    if(EXTI_GetITStatus(EXTI_OK_LINE)!=RESET){
+
+    if(EXTI_GetITStatus(EXTI_OK_LINE)!=RESET && GPIO_ReadInputDataBit( EXTI_OK_GPIO, EXTI_OK_PIN ) == Bit_RESET ){
         xResult = xEventGroupSetBitsFromISR( EGHandle_Hardware, kHWEvent_JoySitck_Pressed, &xHigherPriorityTaskWoken );
 
         if( xResult != pdFAIL ){
@@ -191,8 +199,25 @@ void JOYSTICK_IRQHandler(void){
         }
         //...//
     }
+
+
+    if(EXTI_GetITStatus(NRF_LINE)!=RESET && GPIO_ReadInputDataBit( NRF_GPIO_IRQ, NRF_PIN_IRQ ) == Bit_RESET ){
+         extern bool message;
+         xResult = xEventGroupSetBitsFromISR( EGHandle_Hardware, kHWEvent_NRF24L01_RecvReady, &xHigherPriorityTaskWoken );
+
+        if( xResult != pdFAIL ){
+            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+        }
+        message = true;
+        //...// 
+    }
+
     EXTI_ClearITPendingBit(EXTI_OK_LINE);
+    EXTI_ClearITPendingBit(NRF_LINE);
+
 }
+
+#define NRF24L01_IRQHandler     
 
 void assert_failed(uint8_t* file, uint32_t line){
     // const char* FILE = (char*)file;

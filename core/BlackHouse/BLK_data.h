@@ -8,14 +8,6 @@
 extern "C" {
 #endif
 
-#define BLK_DATA_CALLOC(x,s)           RH_CALLOC(x,s)
-#define BLK_DATA_MALLOC(x)             RH_MALLOC(x)
-#define BLK_DATA_FREE(x)               RH_FREE(x)
-#define BLK_DATA_ASSERT(expr)          RH_ASSERT(expr)
-
-#define BLK_DATA_HASH_CALLOC(x,s)      RH_CALLOC(x,s)
-#define BLK_DATA_HASH_MALLOC(x)        RH_MALLOC(x)
-#define BLK_DATA_HASH_FREE(x)          RH_FREE(x)
 
 /*=====================================================================
 > Data Structure Reference

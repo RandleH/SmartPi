@@ -8,21 +8,15 @@
 #define ADC_BASE                 ADC1
 
 #define DMAx_CHx                 DMA1_Channel1
-#define DMA_RCC                  RCC_AHBPeriph_DMA1
 
 #define ADC_X_CH                 ADC_Channel_8
-#define ADC_X_RCC                RCC_APB2Periph_ADC1
-#define ADC_X_GPIO_RCC           RCC_APB2Periph_GPIOB
 #define ADC_X_GPIO               GPIOB
 #define ADC_X_PIN                GPIO_Pin_0
        
 #define ADC_Y_CH                 ADC_Channel_9
-#define ADC_Y_RCC                RCC_APB2Periph_ADC1
-#define ADC_Y_GPIO_RCC           RCC_APB2Periph_GPIOB
 #define ADC_Y_GPIO               GPIOB
 #define ADC_Y_PIN                GPIO_Pin_1
        
-#define EXTI_OK_GPIO_RCC         RCC_APB2Periph_GPIOA
 #define EXTI_OK_GPIO             GPIOA
 #define EXTI_OK_PIN              GPIO_Pin_7
 #define EXTI_OK_LINE             EXTI_Line7
@@ -32,14 +26,18 @@
 #define JOYSTICK_IRQHandler      EXTI9_5_IRQHandler
 
 
+#define RCC_ENABLE               do{ RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB       | \
+                                                             RCC_APB2Periph_GPIOA       | \
+                                                             RCC_APB2Periph_ADC1        | \
+                                                             RCC_APB2Periph_AFIO,ENABLE );\
+                                     RCC_AHBPeriphClockCmd ( RCC_AHBPeriph_DMA1 ,ENABLE );\
+                                 }while(0)
+
+
 uint16_t joystick_data[2] = {0};
 
 static void __configGPIO(void){
     GPIO_InitTypeDef GPIO_InitStructure;
-    
-    RCC_APB2PeriphClockCmd(ADC_X_GPIO_RCC|ADC_Y_GPIO_RCC|EXTI_OK_GPIO_RCC,ENABLE);
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO,ENABLE);
     
     /* Initialize the OK Pin */
     GPIO_InitStructure.GPIO_Pin     = EXTI_OK_PIN;
@@ -55,7 +53,6 @@ static void __configGPIO(void){
     GPIO_InitStructure.GPIO_Pin        = ADC_Y_PIN;
     GPIO_InitStructure.GPIO_Mode     = GPIO_Mode_AIN;
     GPIO_Init(ADC_Y_GPIO, &GPIO_InitStructure);
-
 
     GPIO_EXTILineConfig( EXTI_OK_PORTSRC );
 
@@ -77,7 +74,6 @@ static void __configNVIC(void){
     
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
     NVIC_InitStructure.NVIC_IRQChannel = EXTI_OK_IRQ;
-
     
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 1;
@@ -87,8 +83,6 @@ static void __configNVIC(void){
 
 static void __configDMA(void){
     DMA_InitTypeDef DMA_InitStructure;
-    
-    RCC_AHBPeriphClockCmd(DMA_RCC,ENABLE);
 
     DMA_DeInit(DMAx_CHx);
     
@@ -110,8 +104,6 @@ static void __configDMA(void){
 
 static void __configADC(void){
     ADC_InitTypeDef ADC_InitStructure;
-    
-    RCC_APB2PeriphClockCmd(ADC_X_RCC, ENABLE);
 
     ADC_InitStructure.ADC_Mode               = ADC_Mode_Independent; 
     ADC_InitStructure.ADC_ScanConvMode       = ENABLE;
@@ -134,6 +126,7 @@ static void __configADC(void){
 }
 
 void JoyStick_Init(void){
+    RCC_ENABLE;
     __configGPIO();
     __configEXTI();
     __configNVIC();
