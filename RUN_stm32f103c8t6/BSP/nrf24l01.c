@@ -1,8 +1,4 @@
 
-#include "stm32f10x_conf.h"
-#include "stm32f10x_spi.h"
-#include "stm32f10x_gpio.h"
-#include "delay.h"
 
 #include "nrf24l01.h"
 
@@ -54,31 +50,7 @@
 
 #define DATA_LEN                 32
 
-#define SPI_PIN_MOSI             GPIO_Pin_15 
-#define SPI_PIN_MISO             GPIO_Pin_14 
-#define SPI_PIN_SCL              GPIO_Pin_13 
-#define SPI_GPIO                 GPIOB
 
-#define NRF_PIN_CS               GPIO_Pin_4
-#define NRF_GPIO_CS              GPIOB  
-
-#define NRF_PIN_CE               GPIO_Pin_3
-#define NRF_GPIO_CE              GPIOB
-
-#define NRF_PIN_IRQ              GPIO_Pin_5 
-#define NRF_GPIO_IRQ             GPIOB
-#define NRF_PORTSRC_IRQ          GPIO_PortSourceGPIOB, GPIO_PinSource5
-#define NRF_IRQn                 EXTI9_5_IRQn
-#define NRF_LINE                 EXTI_Line5
-
-#define SPI_BASE                 SPI2
-
-
-
-#define RCC_ENABLE               do{ RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB | \
-                                                             RCC_APB2Periph_AFIO  , ENABLE );\
-                                     RCC_APB1PeriphClockCmd( RCC_APB1Periph_SPI2  , ENABLE );\
-                                 } while(0)
 
 
 #define CS(x)                    GPIO_WriteBit( NRF_GPIO_CS , NRF_PIN_CS, (BitAction)x)
@@ -95,7 +67,6 @@ static struct{
     bool    mode;     // 0 = recv; 1 = send;
     bool    crc;
     uint8_t pipe;
-
 }cache;
 
 
@@ -198,7 +169,7 @@ static uint8_t __readReg(uint8_t reg){
     return status;
 }
 
-static uint8_t __writeReg(uint8_t reg,uint8_t data){    
+static uint8_t __writeReg(uint8_t reg,uint8_t data){
     CS(0);
     
     uint8_t status = __transferByte(reg);
@@ -208,7 +179,7 @@ static uint8_t __writeReg(uint8_t reg,uint8_t data){
     return status;
 }
 
-static uint8_t __writeBuf(uint8_t reg,uint8_t *p,uint8_t len){  
+static uint8_t __writeBuf(uint8_t reg,uint8_t *p,uint8_t len){
     CS(0);
     
     uint8_t status = __transferByte( reg );
@@ -219,7 +190,7 @@ static uint8_t __writeBuf(uint8_t reg,uint8_t *p,uint8_t len){
     return status;
 }
 
-static uint8_t __readBuf(uint8_t reg,uint8_t *pBuf,uint8_t len){    
+static uint8_t __readBuf(uint8_t reg,uint8_t *pBuf,uint8_t len){
     CS(0);
     
     uint8_t status = __transferByte( reg );
@@ -258,14 +229,13 @@ bool NRF24L01_check(void){
 
 void NRF24L01_tx(void){
     CE(0);
-    
     __writeBuf( NRF24L01_WRITE_REG|TX_ADDR   , (uint8_t *)NRF24L01_TX_Addr, sizeof(NRF24L01_TX_Addr));  /* 设置主机地址 */
     __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P0, (uint8_t *)NRF24L01_RX_Addr, sizeof(NRF24L01_RX_Addr));  /* 设置目标地址 发送通道号：0 */
     
     /* 配置发送属性 详见说明书 Page21 */
     __writeReg( NRF24L01_WRITE_REG|EN_AA     , 0x01);   /* Enable ‘Auto Acknowledgment’ Function */
     __writeReg( NRF24L01_WRITE_REG|EN_RXADDR , 0x01);   /* Enabled RX Addresses */
-#if 0    
+#if 0
     __writeReg(NRF24L01_WRITE_REG|SETUP_AW, 0x02);      /* Setup of Address Widths */
 #endif
     __writeReg( NRF24L01_WRITE_REG|SETUP_RETR, 0x1a);   /* Setup of Automatic Retransmission */    
@@ -377,8 +347,27 @@ void NRF24L01_setRXAddr( uint8_t pipe, uint8_t *addr, uint8_t len ){
     // CE(1);
 }
 
+const uint8_t* NRF24L01_getTXAddr(uint8_t* byteCnt){
+    if( byteCnt!=NULL )
+        *byteCnt = sizeof(NRF24L01_TX_Addr);
+    return NRF24L01_TX_Addr;
+}
 
+const uint8_t* NRF24L01_getRXAddr(uint8_t* byteCnt){
+    if( byteCnt!=NULL )
+        *byteCnt = sizeof(NRF24L01_RX_Addr);
+    return NRF24L01_RX_Addr;
+}
 
+void NRF24L01_autoACK( bool cmd ){
+    cache.aa = cmd;
+    //...//
+}
+
+void NRF24L01_enCRC( bool cmd ){
+    cache.crc = cmd;
+    //...//
+}
 
 
 
