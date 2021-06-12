@@ -379,10 +379,14 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
     param.size = 5;
     if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RXAddress ){
         param.text = "RX Address:";
-        memcpy( param.Addr, NRF24L01_RX_Addr, 5 );
+        uint8_t len = 0;
+        const uint8_t* rxaddr = NRF24L01_getRXAddr( &len );
+        memcpy( param.Addr, rxaddr, len );
     }else{
         param.text = "TX Address:";
-        memcpy( param.Addr, NRF24L01_TX_Addr, 5 );
+        uint8_t len = 0;
+        const uint8_t* txaddr = NRF24L01_getTXAddr( &len );
+        memcpy( param.Addr, txaddr, len );
     }
     
     
@@ -399,9 +403,9 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
                                    portMAX_DELAY ); // 永久等待
    
     if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RXAddress ){
-        memcpy( NRF24L01_RX_Addr, param.Addr, 5 );
+        NRF24L01_setRXAddr( 0, param.Addr, sizeof(param.Addr) );
     }else{
-        memcpy( NRF24L01_TX_Addr, param.Addr, 5 );
+        NRF24L01_setTXAddr( param.Addr, sizeof(param.Addr) );
     }
 /*====================================================================
  * Clear  清除任务

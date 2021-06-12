@@ -202,12 +202,12 @@ void EXTI9_5_IRQHandler(void){
 
 
     if(EXTI_GetITStatus(NRF_LINE)!=RESET && GPIO_ReadInputDataBit( NRF_GPIO_IRQ, NRF_PIN_IRQ ) == Bit_RESET ){
-         extern bool message;
-         xResult = xEventGroupSetBitsFromISR( EGHandle_Hardware, kHWEvent_NRF24L01_RecvReady, &xHigherPriorityTaskWoken );
+        extern bool message;
+        // xResult = xEventGroupSetBitsFromISR( EGHandle_Hardware, kHWEvent_NRF24L01_RecvReady, &xHigherPriorityTaskWoken );
 
-        if( xResult != pdFAIL ){
-            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-        }
+        // if( xResult != pdFAIL ){
+        //     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+        // }
         message = true;
         //...// 
     }
