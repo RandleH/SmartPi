@@ -796,6 +796,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\core\SmartPi\RH_subtask.c</FilePath>
             </File>
+            <File>
+              <FileName>SMP_delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\core\SmartPi\SMP_delay.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

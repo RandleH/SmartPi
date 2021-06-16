@@ -30,6 +30,7 @@ typedef enum{
     ROOT_Hardware_NRF24L01_TXMode     , //  ////
     ROOT_Hardware_NRF24L01_TXAddress  , //  ////
     ROOT_Hardware_NRF24L01_ACK        , //  ////
+    ROOT_Hardware_NRF24L01_RFCH       , //  ////
     
     ROOT_Game_                        , //  ---
     ROOT_Game_Manila                  , //  ///
@@ -94,6 +95,7 @@ typedef enum{
     kSWEvent_CTRL_Finished     = (1<<2),   // 2
     kSWEvent_ParentTaskCall    = (1<<3),   // 3
     kSWEvent_ChildTaskCall     = (1<<4),   // 4
+    kSWEvent_UI_Refreashed     = (1<<5),   // 5
 
 }E_SWEvent_t;
 

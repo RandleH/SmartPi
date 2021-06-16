@@ -42,10 +42,11 @@
 /*==========================================
  * C标准库API
 ==========================================*/     
-#include "delay.h"
-#include "RH_config.h"                            
-#define   NRF24L01_DELAY_MS(ms)    delay_ms(ms)
-#define   NRF24L01_DELAY_US(us)    delay_us(us) 
+#include "SMP_delay.h"
+#include "RH_config.h"  
+                       
+#define   NRF24L01_DELAY_MS(ms)    SMP_delay_ms( ms ) // 假的延时函数, freeRTOS无法兼容正常延时, 因此每次切换模块模式需自行延时
+#define   NRF24L01_DELAY_US(us)    SMP_delay_us( us ) 
 #define   NRF24L01_ASSERT(expr)    RH_ASSERT(expr)
 #define   NRF24L01_MALLOC(x)       RH_MALLOC(x)
 #define   NRF24L01_CALLOC(x,s)     RH_CALLOC(x,s)
@@ -266,7 +267,7 @@ typedef struct S_NRF24L01_CFG_t* P_NRF24L01_CFG_t;
 /*==========================================
  * NRF24L01全局配置参数
 ==========================================*/
-extern S_NRF24L01_CFG_t G_NRF24L01_Config;
+
 
 
 /*========================================================
@@ -282,11 +283,11 @@ extern S_NRF24L01_CFG_t G_NRF24L01_Config;
 void      NRF24L01_init       ( void );
 bool      NRF24L01_exist      ( void );
 bool      NRF24L01_hasMessage ( void );
-void      NRF24L01_tx     ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用全局配置; ptr: 使用自定义配置; 将配置写入模块并设置成发送模式 //
-void      NRF24L01_rx     ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用全局配置; ptr: 使用自定义配置; 将配置写入模块并设置成接收模式
-void      NRF24L01_pd     ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用全局配置; ptr: 使用自定义配置; 将配置写入模块并设置成掉电模式 //
-void      NRF24L01_rdCfg  (       S_NRF24L01_CFG_t  *p ); //  NULL: 不允许     ; ptr: 目标写入     ; 从模块读取当前配置 
-void      NRF24L01_wtCfg  ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用全局配置; ptr: 使用自定义配置; 将配置写入模块 
+void      NRF24L01_tx         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成发送模式 //
+void      NRF24L01_rx         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成接收模式
+void      NRF24L01_pd         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成掉电模式 //
+void      NRF24L01_rdCfg      (       S_NRF24L01_CFG_t  *p ); //  NULL: 不允许     ; ptr: 目标写入     ; 从模块读取当前配置 
+void      NRF24L01_wtCfg      ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块 
 
 /*========================================================
  * NRF24L01 配置参数设定
@@ -294,13 +295,19 @@ void      NRF24L01_wtCfg  ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用全局
  * 以下函数将写入至 全局结构体 G_NRF24L01_Config 
  * 以下函数将更改模块参数
 =========================================================*/
-void      NRF24L01_autoACK    ( bool cmd );
-void      NRF24L01_enCRC      ( bool cmd );
-void      NRF24L01_setTXAddr  (                uint8_t *addr, uint8_t len );//
-void      NRF24L01_setRXAddr  ( uint8_t  pipe, uint8_t *addr, uint8_t len );//
+void               NRF24L01_autoACK    ( bool cmd );
+void               NRF24L01_enCRC      ( bool cmd );
 
-const uint8_t* NRF24L01_getTXAddr ( uint8_t *byteCnt);
-const uint8_t* NRF24L01_getRXAddr ( uint8_t *byteCnt);
+void               NRF24L01_setTXAddr  (                uint8_t *addr, uint8_t len );//
+void               NRF24L01_setRXAddr  ( uint8_t  pipe, uint8_t *addr, uint8_t len );//
+
+const uint8_t*     NRF24L01_getTXAddr  ( uint8_t *byteCnt);
+const uint8_t*     NRF24L01_getRXAddr  ( uint8_t *byteCnt);
+
+
+E_NRF24L01_Freq_t  NRF24L01_getFreq    ( void );
+void               NRF24L01_setFreq    ( E_NRF24L01_Freq_t freq );
+
 
 /*========================================================
  * NRF24L01 收发函数 

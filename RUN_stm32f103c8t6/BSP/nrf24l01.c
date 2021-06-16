@@ -48,6 +48,24 @@
 #define FIFO_STATUS              0x17  //FIFO状态寄存器;bit0,RX FIFO寄存器空标志;bit1,RX FIFO满标志;bit2,3,保留
                                        //bit4,TX FIFO空标志;bit5,TX FIFO满标志;bit6,1,循环发送上一数据包.0,不循环;
 
+
+#define DEFAULT_CONFIG           { \
+                                   .autoACK = true  ,\
+                                   .crc     = true  ,\
+                                   .gainLNA = true  ,\
+                                   .lockPLL = false ,\
+                                   .pipe    = NRF24L01_PIPE_P0      ,\
+                                   .rate    = NRF24L01_RATE_2Mbps   ,\
+                                   .freq    = NRF24L01_FREQ_2440MHz ,\
+                                   .crco    = NRF24L01_CRCO_2Byte   ,\
+                                   .pwr     = NRF24L01_PWR_0dBm     ,\
+                                   .addr.tx     = { 0xff, 0xff, 0xff, 0xff, 0x7f } ,\
+                                   .addr.rx_p0  = { 0xff, 0xff, 0xff, 0xff, 0x7f } ,\
+                                   .addr.rx_p1  = { 0xff, 0xff, 0xff, 0xff, 0x8f } ,\
+                                   .data.buf = cache  ,\
+                                   .data.len = sizeof(cache)  \
+                                 }
+
 #pragma anon_unions
 
 typedef union {
@@ -85,8 +103,6 @@ typedef union{
 
 
 static uint8_t cache[32] = {0};
-
-S_NRF24L01_CFG_t G_NRF24L01_Config;
 
 
 static void __configGPIO(void){
@@ -231,27 +247,9 @@ void NRF24L01_init(void){
         return;
     }
 
-    G_NRF24L01_Config.autoACK = true;
-    G_NRF24L01_Config.crc     = true;
-    G_NRF24L01_Config.gainLNA = true;  
-    G_NRF24L01_Config.lockPLL = false; 
-    G_NRF24L01_Config.pipe    = NRF24L01_PIPE_P0;
-    G_NRF24L01_Config.rate    = NRF24L01_RATE_2Mbps;
-    G_NRF24L01_Config.freq    = NRF24L01_FREQ_2440MHz;
-    G_NRF24L01_Config.crco    = NRF24L01_CRCO_2Byte;
-    G_NRF24L01_Config.pwr     = NRF24L01_PWR_0dBm;
-    
-    G_NRF24L01_Config.addr.tx[0] = G_NRF24L01_Config.addr.rx_p0[0] = G_NRF24L01_Config.addr.rx_p1[0] = 0xff;
-    G_NRF24L01_Config.addr.tx[1] = G_NRF24L01_Config.addr.rx_p0[1] = G_NRF24L01_Config.addr.rx_p1[1] = 0xff;
-    G_NRF24L01_Config.addr.tx[2] = G_NRF24L01_Config.addr.rx_p0[2] = G_NRF24L01_Config.addr.rx_p1[2] = 0xff;
-    G_NRF24L01_Config.addr.tx[3] = G_NRF24L01_Config.addr.rx_p0[3] = G_NRF24L01_Config.addr.rx_p1[3] = 0xff;
-    G_NRF24L01_Config.addr.tx[4] = G_NRF24L01_Config.addr.rx_p0[4] = G_NRF24L01_Config.addr.rx_p1[4] = 0x7e;
-    
-    G_NRF24L01_Config.data.buf = cache;
-    G_NRF24L01_Config.data.len = sizeof(cache);
+    S_NRF24L01_CFG_t cfg = DEFAULT_CONFIG;
 
-    NRF24L01_wtCfg( &G_NRF24L01_Config );
- 
+    NRF24L01_wtCfg( &cfg ); 
 }
 
 bool NRF24L01_exist(void){
@@ -278,24 +276,11 @@ bool NRF24L01_hasMessage(void){
 }
 
 void NRF24L01_tx( const S_NRF24L01_CFG_t  *p ){
+    S_NRF24L01_CFG_t cfg = DEFAULT_CONFIG;
+
     CE(0);
-#if 0 
-    __writeBuf( NRF24L01_WRITE_REG|TX_ADDR   , (uint8_t *)NRF24L01_TX_Addr, sizeof(NRF24L01_TX_Addr));  /* 设置主机地址 */
-    __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P0, (uint8_t *)NRF24L01_RX_Addr, sizeof(NRF24L01_RX_Addr));  /* 设置目标地址 发送通道号：0 */
-    
-    /* 配置发送属性 详见说明书 Page21 */
-    __writeReg( NRF24L01_WRITE_REG|EN_AA     , 0x01);   /* Enable ‘Auto Acknowledgment’ Function */
-    __writeReg( NRF24L01_WRITE_REG|EN_RXADDR , 0x01);   /* Enabled RX Addresses */
-
-    __writeReg(NRF24L01_WRITE_REG|SETUP_AW, 0x02);      /* Setup of Address Widths */
-
-    __writeReg( NRF24L01_WRITE_REG|SETUP_RETR, 0x1a);   /* Setup of Automatic Retransmission */    
-    __writeReg( NRF24L01_WRITE_REG|RF_CH     , 40  );   /* RF Channel */
-    __writeReg( NRF24L01_WRITE_REG|RF_SETUP  , 0x0f);   /* RF Setup Register */
-    __writeReg( NRF24L01_WRITE_REG|CONFIG    , 0x0e);   /* TxMode | EN_CRC | 16BIT_CRC | PWR_UP */
-#endif
     if( p==NULL ){
-        p = &G_NRF24L01_Config; 
+        p = &cfg; 
     }
 
     NRF24L01_wtCfg( p );
@@ -320,10 +305,11 @@ void NRF24L01_tx( const S_NRF24L01_CFG_t  *p ){
 }
 
 void NRF24L01_rx( const S_NRF24L01_CFG_t  *p ){
-    CE(0);
+    S_NRF24L01_CFG_t cfg = DEFAULT_CONFIG;
 
+    CE(0);
     if( p==NULL ){
-        p = &G_NRF24L01_Config; 
+        p = &cfg; 
     }
 
     NRF24L01_wtCfg( p );
@@ -343,10 +329,11 @@ void NRF24L01_rx( const S_NRF24L01_CFG_t  *p ){
 }
 
 void NRF24L01_pd( const S_NRF24L01_CFG_t  *p ){
-    CE(0);
+    S_NRF24L01_CFG_t cfg = DEFAULT_CONFIG;
 
+    CE(0);
     if( p==NULL ){
-        p = &G_NRF24L01_Config;
+        p = &cfg;
     }
 
     NRF24L01_wtCfg( p );
@@ -408,65 +395,53 @@ uint8_t NRF24L01_recv( uint8_t *buf, uint8_t len ){
 void NRF24L01_setTXAddr( uint8_t *addr, uint8_t len ){
     NRF24L01_ASSERT( len <= 5 );
     NRF24L01_ASSERT( addr );
-
-    memcpy( G_NRF24L01_Config.addr.tx, addr, len );
-
     CE(0);
-    __writeBuf( NRF24L01_WRITE_REG|TX_ADDR, G_NRF24L01_Config.addr.tx, sizeof(G_NRF24L01_Config.addr.tx) ); 
+    __writeBuf( NRF24L01_WRITE_REG|TX_ADDR, addr, len ); 
     CE(1);
 }
 
 void NRF24L01_setRXAddr( uint8_t pipe, uint8_t *addr, uint8_t len ){
-    
     NRF24L01_ASSERT( len <= 5 );
     NRF24L01_ASSERT( addr );
     NRF24L01_ASSERT( pipe <= NRF24L01_PIPE_P5 );
-    NRF24L01_ASSERT( pipe >= NRF24L01_PIPE_P2 && len!=1 );
+    
     
     CE(0);
     switch( pipe ){
-        case NRF24L01_PIPE_P0: memcpy( G_NRF24L01_Config.addr.rx_p0 , addr, len );
-                               __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P0, G_NRF24L01_Config.addr.rx_p0, sizeof(G_NRF24L01_Config.addr.rx_p0) ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P0  , G_NRF24L01_Config.data.len   ); 
+        case NRF24L01_PIPE_P0: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P0, addr, len ); 
+                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P0  , len   ); 
                                break;
-        case NRF24L01_PIPE_P1: memcpy( G_NRF24L01_Config.addr.rx_p1 , addr, len );
-                               __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, G_NRF24L01_Config.addr.rx_p1, sizeof(G_NRF24L01_Config.addr.rx_p1) ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P1  , G_NRF24L01_Config.data.len   ); 
+        case NRF24L01_PIPE_P1: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, addr, len ); 
+                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P1  , len   ); 
                                break;
-        case NRF24L01_PIPE_P2: memcpy( &G_NRF24L01_Config.addr.rx_p2 , addr, len );
-                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P2, G_NRF24L01_Config.addr.rx_p2 ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P2  , G_NRF24L01_Config.data.len   ); 
+        case NRF24L01_PIPE_P2: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P2, *addr ); 
+                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P2  , 1     ); 
                                break;
-        case NRF24L01_PIPE_P3: memcpy( &G_NRF24L01_Config.addr.rx_p3 , addr, len );
-                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P3, G_NRF24L01_Config.addr.rx_p3 ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P3  , G_NRF24L01_Config.data.len   ); 
+        case NRF24L01_PIPE_P3: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P3, *addr ); 
+                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P3  , 1     ); 
                                break;
-        case NRF24L01_PIPE_P4: memcpy( &G_NRF24L01_Config.addr.rx_p4 , addr, len );
-                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P4, G_NRF24L01_Config.addr.rx_p4 ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P4  , G_NRF24L01_Config.data.len   ); 
+        case NRF24L01_PIPE_P4: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P4, *addr ); 
+                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P4  , 1     ); 
                                break;
-        case NRF24L01_PIPE_P5: memcpy( &G_NRF24L01_Config.addr.rx_p5 , addr, len );
-                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P5, G_NRF24L01_Config.addr.rx_p5 ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P5  , G_NRF24L01_Config.data.len   ); 
-                               break;    
+        case NRF24L01_PIPE_P5: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P5, *addr ); 
+                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P5  , 1     ); 
+                               break;
     }                               
     CE(1);
 }
 
+static uint8_t __tx[5], __rx[5];
 const uint8_t* NRF24L01_getTXAddr(uint8_t* byteCnt){
-    if( byteCnt!=NULL )
-        *byteCnt = sizeof(G_NRF24L01_Config.addr.tx);
-    return G_NRF24L01_Config.addr.tx;
+
+    return __tx;
 }
 
 const uint8_t* NRF24L01_getRXAddr(uint8_t* byteCnt){
-    if( byteCnt!=NULL )
-        *byteCnt = sizeof(G_NRF24L01_Config.addr.rx_p0);
-    return G_NRF24L01_Config.addr.rx_p0;
+
+    return __rx;
 }
 
 void NRF24L01_autoACK( bool cmd ){
-    G_NRF24L01_Config.autoACK = cmd;
     CE(0);
     __writeReg( NRF24L01_WRITE_REG|EN_AA, (cmd==true)?0x3f:0x00 );
     CE(1);
@@ -476,7 +451,7 @@ void NRF24L01_autoACK( bool cmd ){
 void NRF24L01_enCRC( bool cmd ){
     CE(0);
     REG_CONFIG_t config = { .val = __readReg( NRF24L01_WRITE_REG|CONFIG ) };
-    config._EN_CRC = G_NRF24L01_Config.crc = cmd;
+    config._EN_CRC = cmd;
     __writeReg( NRF24L01_WRITE_REG|CONFIG, config.val );
     CE(1);
     NRF24L01_DELAY_US(130);
@@ -606,6 +581,15 @@ void NRF24L01_rdCfg(       S_NRF24L01_CFG_t *p ){
     }
 
     CE(1);
+}
+
+E_NRF24L01_Freq_t  NRF24L01_getFreq    ( void ){
+    return (E_NRF24L01_Freq_t)__readReg( NRF24L01_READ_REG|RF_CH );
+}
+
+void               NRF24L01_setFreq    ( E_NRF24L01_Freq_t freq ){
+    REG_RFCH_t rf_ch = { ._RF_CH = (uint8_t)freq };
+    __writeReg( NRF24L01_WRITE_REG|RF_CH , rf_ch.val );
 }
 
 

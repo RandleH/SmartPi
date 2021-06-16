@@ -1,5 +1,6 @@
 
 #include "RH_task.h"
+#include "SMP_delay.h"
 
 #include "GLU_glucoo.h"
 #include "RH_color.h"
@@ -99,6 +100,9 @@ extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param );
 
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, UI   ) ( void* param );
+
 extern void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param );
 
@@ -114,8 +118,8 @@ extern void MAKE_TASK( subtask, ROOT_Game_Manila, UI   ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, default   , CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, default   , UI   ) ( void* param );
+extern void MAKE_TASK( subtask, Default   , CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, Default   , UI   ) ( void* param );
 
 /*====================================================================
  * SmartPi 主任务
@@ -304,7 +308,7 @@ case ROOT_Hardware_NRF24L01:{
 =====================================================================*/
     SmartPi.serv_ID        = ROOT_Hardware_NRF24L01;
     SmartPi.serv_ID_tmp    = 1;
-    SmartPi.numOfNextNodes = 5;
+    SmartPi.numOfNextNodes = 6;
 
     taskENTER_CRITICAL();
     SmartPi.cache_task_num    = 2;
@@ -337,7 +341,7 @@ case ROOT_Hardware_NRF24L01:{
     taskENTER_CRITICAL();
     SmartPi.deleteSubtask();
     taskEXIT_CRITICAL();
-    
+
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/
@@ -345,7 +349,6 @@ case ROOT_Hardware_NRF24L01:{
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
     else{
         BLK_FUNC( Stack, push )( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
-        // SmartPi.serv_ID <<= 4;
         SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Hardware_NRF24L01_ + SmartPi.serv_ID_tmp);
     }
     
@@ -376,6 +379,7 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
         int         bucket;
         const char* text;
     }param;
+
     param.size = 5;
     if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RXAddress ){
         param.text = "RX Address:";
@@ -434,6 +438,64 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
     SmartPi.cache_task_handle = NULL;
     break;
 }
+
+case ROOT_Hardware_NRF24L01_RFCH:{
+/*====================================================================
+ * Init  初始化
+=====================================================================*/
+    SmartPi.serv_ID_tmp       = 0;
+    SmartPi.numOfNextNodes    = 0;
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+    struct{
+        E_NRF24L01_Freq_t freq;
+        E_NRF24L01_Freq_t max;
+        E_NRF24L01_Freq_t min;
+        int16_t           offset;
+    }param;
+    param.min    = NRF24L01_FREQ_2400MHz;
+    param.max    = NRF24L01_FREQ_2525MHz;
+    param.freq   = NRF24L01_getFreq();
+    param.offset = 2400 + (uint8_t)NRF24L01_FREQ_2400MHz; 
+
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up | kHWEvent_JoySitck_Down | kHWEvent_JoySitck_Pressed );
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+
+    taskENTER_CRITICAL();
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, UI   ) , NULL, 256, &param, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, CTRL ) , NULL, 128, &param, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+
+/*====================================================================
+ * Blocked  阻塞区
+=====================================================================*/
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                   pdTRUE,          // 清除该位
+                                   pdTRUE,          // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
+
+/*====================================================================
+ * Clear  清除任务
+=====================================================================*/
+    SmartPi.deleteSubtask();
+
+/*====================================================================
+ * Process 数据处理
+=====================================================================*/
+    NRF24L01_setFreq( param.freq );
+    //...//
+
+/*====================================================================
+ * Back  返回
+=====================================================================*/
+    SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
+    SmartPi.cache_task_num    = 0;
+    SmartPi.cache_task_handle = NULL;
+
+    I_AM_CHILD; break;
+}
+
                 
 case ROOT_Hardware_JoyStick:{
 /*====================================================================
@@ -472,10 +534,9 @@ case ROOT_Hardware_JoyStick:{
     taskEXIT_CRITICAL();
     
 /*====================================================================
- * Next  进入下一业务
+ * Back  返回
 =====================================================================*/
     SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
-    
     SmartPi.cache_task_num    = 0;
     SmartPi.cache_task_handle = NULL;
     break;
@@ -719,8 +780,8 @@ default:{
     xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
                                              kSWEvent_CTRL_Finished    );
 
-    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, default   , UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, default   , CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, Default   , UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, Default   , CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
     
     // 进入阻塞, 直到子任务完成为止
@@ -797,11 +858,14 @@ void __TaskStatic_radio( void* param ){
 static StaticTask_t   Task_TCB_led_heart;
 static StackType_t    Task_Stack_led_heart[64];
 void __TaskStatic_led_heart( void* param ){
+    TickType_t        prevTick = xTaskGetTickCount();
+    const  TickType_t onTick   = pdMS_TO_TICKS(50);
+    const  TickType_t offTick  = pdMS_TO_TICKS(2000);
     while(1){
         LED_Set(1);
-        vTaskDelay(10);
+        vTaskDelayUntil( &prevTick, onTick  );
         LED_Set(0);
-        vTaskDelay(500);
+        vTaskDelayUntil( &prevTick, offTick );
     }
 }
 

@@ -8,6 +8,7 @@
 #include "task.h"
 
 #include "joystick.h"
+#include "nrf24l01.h"
 
 #include "RH_task.h"
 
@@ -17,6 +18,16 @@
 #undef MAKE_TASK
 #endif
 #define MAKE_TASK( CLASS, ID, TYPE ) __##CLASS##_##ID##_##TYPE
+
+
+
+
+
+
+
+
+
+
 
 void MAKE_TASK( subtask, ROOT, UI   ) ( void* param ){
 #ifdef RH_DEBUG	
@@ -138,6 +149,16 @@ void MAKE_TASK( subtask, ROOT, CTRL ) ( void* param ){
     xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
     while(1);  
 }
+
+
+
+
+
+
+
+
+
+
 
 void MAKE_TASK( subtask, ROOT_Hardware, UI   ) ( void* param ){
 /*====================================================================
@@ -266,6 +287,16 @@ void MAKE_TASK( subtask, ROOT_Hardware, CTRL ) ( void* param ){
     while(1);
 }
 
+
+
+
+
+
+
+
+
+
+
 void MAKE_TASK( subtask, ROOT_Game, UI   ) ( void* param ){
 /*====================================================================
  * Init  子任务参数初始化
@@ -386,7 +417,15 @@ void MAKE_TASK( subtask, ROOT_Game, CTRL ) ( void* param ){
     xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
     while(1);
 }
-    
+
+
+
+
+
+
+
+
+
 
 
 void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param ){
@@ -405,7 +444,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param ){
         cfg.area.ys = 0;
         cfg.area.height = RH_CFG_SCREEN_HEIGHT -1;
         cfg.area.width  = RH_CFG_SCREEN_WIDTH  -1;
-        cfg.nItem = 5;
+        cfg.nItem = SmartPi.numOfNextNodes;
         cfg.title = "NRF24L01";
         cfg.color_title = M_COLOR_WHITE;
         cfg.size  = 10;
@@ -414,12 +453,14 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param ){
         cfg.sl_color    = M_COLOR_WHITE;
         cfg.text_color  = M_COLOR_WHITE;
 
-        __GUI_MenuParam_t m[5] = {0};
+        __GUI_MenuParam_t* m = alloca( SmartPi.numOfNextNodes*sizeof(__GUI_MenuParam_t) );
         m[0].text = "RX mode";
-        m[1].text = "RX Address";
+        m[1].text = "RX address";
         m[2].text = "TX mode";
-        m[3].text = "TX Address";
+        m[3].text = "TX address";
         m[4].text = "ACK";
+        m[5].text = "RF channel";
+
         cfg.menuList = m;
     
         ID_Menu = GLU_FUNC( Menu, create )(&cfg);
@@ -517,6 +558,16 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, CTRL ) ( void* param ){
     while(1);
 }
 
+
+
+
+
+
+
+
+
+
+
 void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param ){
 #ifdef RH_DEBUG
     RH_ASSERT( SmartPi.serv_ID == 0x00000112 || SmartPi.serv_ID == 0x00000114 );
@@ -553,24 +604,24 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
         // cfg.min[0]      = 0;
         // cfg.val[0]      = p->Addr[0];
         cfg.showFrame   = true;
-        ID_Addr[0] = GLU_FUNC( Object, create )( &cfg );
+        ID_Addr[0] = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.showFrame  = false;
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[1];
-        ID_Addr[1] = GLU_FUNC( Object, create )( &cfg );
+        ID_Addr[1] = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[2];
-        ID_Addr[2] = GLU_FUNC( Object, create )( &cfg );
+        ID_Addr[2] = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[3];
-        ID_Addr[3] = GLU_FUNC( Object, create )( &cfg );
+        ID_Addr[3] = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.area.xs   += cfg.area.width;
         // cfg.val[0]     = p->Addr[4];
-        ID_Addr[4] = GLU_FUNC( Object, create )( &cfg );
+        ID_Addr[4] = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.widget      = kGUI_ObjStyle_text;
         cfg.area.ys   -= cfg.area.height;
@@ -580,7 +631,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
         cfg.text_align  = kGUI_FontAlign_Left;
         cfg.obj_color   = M_COLOR_WHITE;
         cfg.text_size   = 8;
-        ID_Text         = GLU_FUNC( Object, create )( &cfg );
+        ID_Text         = GLU_FUNC( Object, create )( &cfg, NULL );
     }
     
     GLU_FUNC( Object, insert )( ID_Text    );
@@ -751,6 +802,191 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param 
     while(1);
 }
 
+
+
+
+
+
+
+
+
+
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, UI   ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RFCH );
+    RH_ASSERT( param );
+#endif
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    EventBits_t    xResult;
+    bool           EXIT = false;
+    ID_t           ID_spinbox = 0;
+
+    struct{
+        E_NRF24L01_Freq_t       freq;
+        const E_NRF24L01_Freq_t max;
+        const E_NRF24L01_Freq_t min;
+        const int16_t           offset;
+    } *GLOBAL_data = param;
+
+    __GUI_Object_t cfg = {0};
+    
+    cfg.widget     = kGUI_ObjStyle_spinbox;
+    cfg.obj_color  = M_COLOR_WHITE;
+    cfg.area.width = 60;
+    cfg.area.height= 40;
+    cfg.area.xs    = 34;
+    cfg.area.ys    = 11;
+    cfg.text       = "MHz";
+    cfg.text_size  = 8;
+    cfg.obj_color  = M_COLOR_WHITE;
+    
+    __GUI_ObjDataScr_spinbox UI_data = {
+        .min   = GLOBAL_data->min  + GLOBAL_data->offset ,
+        .max   = GLOBAL_data->max  + GLOBAL_data->offset ,
+        .value = GLOBAL_data->freq + GLOBAL_data->offset ,
+        .text_offset = 35   ,
+        .margin      = 3    ,
+        .active      = true
+    };
+
+    ID_spinbox  = GLU_FUNC( Object, create )( &cfg, &UI_data );
+
+    GLU_FUNC( Object, insert )( ID_spinbox );
+    GLU_FUNC( GUI   , refreashScreen )();
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down|kHWEvent_JoySitck_Pressed,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        taskENTER_CRITICAL();
+        if( xResult&kHWEvent_JoySitck_Up ){
+            UI_data.value = GLOBAL_data->freq + GLOBAL_data->offset;
+            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up );
+        }
+
+        if( xResult&kHWEvent_JoySitck_Down ){
+            UI_data.value = GLOBAL_data->freq + GLOBAL_data->offset;;
+            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Down );
+        }
+        GLU_FUNC( Object, adjust )( ID_spinbox, &UI_data, sizeof(UI_data) );
+
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Pressed );
+        }
+        GLU_FUNC( GUI, refreashScreen )();
+        xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Refreashed ); // 向系统汇报UI界面完成刷新
+        taskEXIT_CRITICAL();
+    }
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    GLU_FUNC( Object, delete )( ID_spinbox );
+    xEventGroupClearBits ( EGHandle_Software, kSWEvent_UI_Refreashed );
+    xEventGroupSetBits   ( EGHandle_Software, kSWEvent_UI_Finished   );
+    while(1);
+
+}
+
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, CTRL ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RFCH );
+    RH_ASSERT( param );
+#endif
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    struct{
+        E_NRF24L01_Freq_t       freq;
+        const E_NRF24L01_Freq_t max;
+        const E_NRF24L01_Freq_t min;
+        const int16_t           offset;
+    }             *data     = param;
+    bool           EXIT     = false;
+    EventBits_t    xResult;
+
+    const TickType_t short_delay = 10, normal_delay=100;
+    TickType_t              time = normal_delay;
+
+    // 使用 16Bit 分别记录上下的操作次数 [7:0]|[7:0]
+    uint16_t         operation_record = 0x0101;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        if( joystick_data[1] > M_JOYSTICK_THREASHOLD_UP ){ // 降低
+            if( data->freq > data->min )
+                data->freq--;
+
+            operation_record &= 0xff00;
+            if( operation_record < (1<<15) ){
+                operation_record <<= 1;
+                time = normal_delay;
+            }else{
+                time = short_delay;
+            }
+            xEventGroupSetBits  ( EGHandle_Hardware, kHWEvent_JoySitck_Up   );
+            xEventGroupWaitBits ( EGHandle_Software, kSWEvent_UI_Refreashed, // 确保UI任务完成一次数据更新, 否则存在屏幕数据与实际变量不符情况
+                                  pdFALSE,         // 清除该位
+                                  pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                  portMAX_DELAY ); // 永久等待
+            xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Refreashed );
+        }else if( joystick_data[1] < M_JOYSTICK_THREASHOLD_DOWN ){ // 增加
+            if( data->freq < data->max )
+                data->freq++;
+
+            operation_record &= 0x00ff;
+            if( operation_record < (1<<7) ){
+                operation_record <<= 1;
+                time = normal_delay;
+            }else{
+                time = short_delay;
+            }
+            operation_record |= (0x0100);
+
+            xEventGroupSetBits  ( EGHandle_Hardware, kHWEvent_JoySitck_Down );
+            xEventGroupWaitBits ( EGHandle_Software, kSWEvent_UI_Refreashed, // 确保UI任务完成一次数据更新, 否则存在屏幕数据与实际变量不符情况
+                                  pdFALSE,         // 清除该位
+                                  pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                  portMAX_DELAY ); // 永久等待
+            xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Refreashed );
+        }else{
+            operation_record = 0x0101;
+            time            = normal_delay;
+        }
+        
+        xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            SmartPi.serv_ID_tmp = 0;
+            EXIT = true;
+            xEventGroupSetBits( EGHandle_Hardware, kHWEvent_JoySitck_Pressed );
+        }
+        vTaskDelay(time);
+    }
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);
+}
+
+
+
+
+
+
+
+
+
+
+
 void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
 #ifdef RH_DEBUG
     RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_JoyStick );
@@ -777,7 +1013,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
         cfg.showFrame   = true;
         cfg.obj_color   = M_COLOR_WHITE;
         cfg.bk_color    = M_COLOR_BLACK;
-        ID_JoyStick     = GLU_FUNC( Object, create )( &cfg );
+        ID_JoyStick     = GLU_FUNC( Object, create )( &cfg, NULL );
 
         cfg.widget       = kGUI_ObjStyle_num;
         cfg.area.xs     = 90;
@@ -789,21 +1025,21 @@ void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, UI   ) ( void* param ){
         cfg.text_size   = 8;
         cfg.text_align  = kGUI_FontAlign_Middle;
         cfg.showFrame   = true;
-        ID_Num_X        = GLU_FUNC( Object, create )( &cfg );
+        ID_Num_X        = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.area.ys    += cfg.area.height;
-        ID_Num_Y        = GLU_FUNC( Object, create )( &cfg );
+        ID_Num_Y        = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.widget       = kGUI_ObjStyle_text;
             
         cfg.area.width  = 10;
         cfg.area.xs    -= cfg.area.width-1;
         cfg.text        = "Y";
-        ID_Text_Y       = GLU_FUNC( Object, create )( &cfg );
+        ID_Text_Y       = GLU_FUNC( Object, create )( &cfg, NULL );
         
         cfg.area.ys    -= cfg.area.height;
         cfg.text        = "X";
-        ID_Text_X       = GLU_FUNC( Object, create )( &cfg );
+        ID_Text_X       = GLU_FUNC( Object, create )( &cfg, NULL );
     }
     
     GLU_FUNC( Object, insert )(ID_JoyStick);
@@ -867,6 +1103,17 @@ void MAKE_TASK( subtask, ROOT_Hardware_JoyStick, CTRL ) ( void* param ){
     while(1);
 }
 
+
+
+
+
+
+
+
+
+
+
+
 void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
 #ifdef RH_DEBUG
     RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_LED );
@@ -896,7 +1143,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
         cfg.obj_color   = M_COLOR_WHITE;
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Switch = GLU_FUNC( Object, create )(&cfg);
+        ID_Switch = GLU_FUNC( Object, create )( &cfg, NULL );
     }
     
     // Config [ Text ]
@@ -918,7 +1165,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_LED, UI   ) ( void* param ){
 
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Text = GLU_FUNC( Object, create )( &cfg );
+        ID_Text = GLU_FUNC( Object, create )( &cfg, NULL );
         
     }
 
@@ -1007,6 +1254,17 @@ void MAKE_TASK( subtask, ROOT_Hardware_LED, CTRL ) ( void* param ){
     while(1);
 }
 
+
+
+
+
+
+
+
+
+
+
+
 void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
 #ifdef RH_DEBUG
     RH_ASSERT( *(typeof(SmartPi.serv_ID)*)param == ROOT_Hardware_Beeper );
@@ -1033,7 +1291,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
         cfg.bk_color    = M_COLOR_BLACK;
 
     
-        ID_Switch = GLU_FUNC( Object, create )(&cfg);
+        ID_Switch = GLU_FUNC( Object, create )( &cfg, NULL );
     }
     
     // Config [ Text ]
@@ -1055,7 +1313,7 @@ void MAKE_TASK( subtask, ROOT_Hardware_Beeper, UI   ) ( void* param ){
 
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Text = GLU_FUNC( Object, create )( &cfg );
+        ID_Text = GLU_FUNC( Object, create )( &cfg, NULL );
         
     }
 
@@ -1144,6 +1402,17 @@ void MAKE_TASK( subtask, ROOT_Hardware_Beeper, CTRL ) ( void* param ){
     xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
     while(1);
 }
+
+
+
+
+
+
+
+
+
+
+
 
 void MAKE_TASK( subtask, ROOT_Game_Manila, UI   ) ( void* param ){
 #ifdef RH_DEBUG
@@ -1286,6 +1555,17 @@ void MAKE_TASK( subtask, ROOT_Game_Manila, CTRL ) ( void* param ){
     while(1);
 }
 
+
+
+
+
+
+
+
+
+
+
+
 void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
 /*====================================================================
  * Init  子任务参数初始化
@@ -1329,11 +1609,11 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
     cfg.area.ys    = 3;
     cfg.area.width = 14;
     
-    ID_Objects[0] = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[0] = GLU_FUNC( Object, create )( &cfg, NULL );
     cfg.area.xs  += cfg.area.width+2;
-    ID_Objects[1] = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[1] = GLU_FUNC( Object, create )( &cfg, NULL );
     cfg.area.xs  += cfg.area.width+2;
-    ID_Objects[2] = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[2] = GLU_FUNC( Object, create )( &cfg, NULL );
     
     GLU_FUNC( Object, insert )( ID_Objects[0] );
     GLU_FUNC( Object, insert )( ID_Objects[1] );
@@ -1364,15 +1644,15 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
     cfg.text        = pStrs[ cache->boat_info[ 0 ].shipment ];
     cfg.showFrame   = false;
     cfg.obj_color   = M_COLOR_WHITE;
-    ID_Objects[4] = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[4] = GLU_FUNC( Object, create )( &cfg, NULL );
 
     cfg.text = pStrs[ cache->boat_info[ 1 ].shipment ];
     cfg.area.xs += cfg.area.width +2;
-    ID_Objects[5] = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[5] = GLU_FUNC( Object, create )( &cfg, NULL );
 
     cfg.text = pStrs[ cache->boat_info[ 2 ].shipment ];
     cfg.area.xs += cfg.area.width +2;
-    ID_Objects[6] = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[6] = GLU_FUNC( Object, create )( &cfg, NULL );
     GLU_FUNC( Object, insert )( ID_Objects[4] );
     GLU_FUNC( Object, insert )( ID_Objects[5] );
     GLU_FUNC( Object, insert )( ID_Objects[6] );
@@ -1385,12 +1665,12 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, UI   ) ( void* param ){
     cfg.area.height  = 11;
     cfg.area.width   = strlen(cfg.text)*6+2;
     cfg.showFrame    = false;
-    ID_Objects[7]    = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[7]    = GLU_FUNC( Object, create )( &cfg, NULL );
     
     cfg.widget       = kGUI_ObjStyle_num;
     cfg.area.xs     += cfg.area.width;
     cfg.area.width   = 7;
-    ID_Objects[3]    = GLU_FUNC( Object, create )( &cfg );
+    ID_Objects[3]    = GLU_FUNC( Object, create )( &cfg, NULL );
     
     
     GLU_FUNC( Object, insert )( ID_Objects[7] );
@@ -1642,7 +1922,18 @@ void MAKE_TASK( subtask, ROOT_Game_Manila_ShipDiagram, CTRL ) ( void* param ){
     while(1);
 }
 
-void MAKE_TASK( subtask, default   , UI   )    ( void* param ){
+
+
+
+
+
+
+
+
+
+
+
+void MAKE_TASK( subtask, Default   , UI   )    ( void* param ){
 /*====================================================================
  * Init  子任务参数初始化
 =====================================================================*/
@@ -1666,7 +1957,7 @@ void MAKE_TASK( subtask, default   , UI   )    ( void* param ){
 
         cfg.bk_color    = M_COLOR_BLACK;
 
-        ID_Object = GLU_FUNC( Object, create )( &cfg );
+        ID_Object = GLU_FUNC( Object, create )( &cfg, NULL );
         
     }
     
@@ -1699,7 +1990,7 @@ void MAKE_TASK( subtask, default   , UI   )    ( void* param ){
 
     while(1);
 }
-void MAKE_TASK( subtask, default   , CTRL )    ( void* param ){
+void MAKE_TASK( subtask, Default   , CTRL )    ( void* param ){
 /*====================================================================
  * Init  子任务参数初始化
 =====================================================================*/
