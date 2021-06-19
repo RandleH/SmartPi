@@ -97,8 +97,14 @@ extern void MAKE_TASK( subtask, ROOT_Game, UI   ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param );
 
-extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param );
-extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG, CTRL ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG, UI   ) ( void* param );
+
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG_Addr, UI   ) ( void* param );
+extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG_Addr, CTRL ) ( void* param );
+
+// extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param );
+// extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param );
 
 extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, CTRL ) ( void* param );
 extern void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, UI   ) ( void* param );
@@ -308,7 +314,7 @@ case ROOT_Hardware_NRF24L01:{
 =====================================================================*/
     SmartPi.serv_ID        = ROOT_Hardware_NRF24L01;
     SmartPi.serv_ID_tmp    = 1;
-    SmartPi.numOfNextNodes = 6;
+    SmartPi.numOfNextNodes = 4;
 
     taskENTER_CRITICAL();
     SmartPi.cache_task_num    = 2;
@@ -356,9 +362,63 @@ case ROOT_Hardware_NRF24L01:{
     SmartPi.cache_task_handle = NULL;
     break;
 }
-                
-case ROOT_Hardware_NRF24L01_RXAddress:
-case ROOT_Hardware_NRF24L01_TXAddress:{
+
+case ROOT_Hardware_NRF24L01_RecvCFG:{
+/*====================================================================
+ * Init  初始化
+=====================================================================*/
+    SmartPi.serv_ID        = ROOT_Hardware_NRF24L01_RecvCFG;
+    SmartPi.serv_ID_tmp    = 1;
+    SmartPi.numOfNextNodes = 2;
+
+    taskENTER_CRITICAL();
+    SmartPi.cache_task_num    = 2;
+    SmartPi.cache_task_handle = alloca( SmartPi.cache_task_num*sizeof(TaskHandle_t) );
+
+    xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left    |
+                                             kHWEvent_JoySitck_Right   |
+                                             kHWEvent_JoySitck_Down    |
+                                             kHWEvent_JoySitck_Up      |
+                                             kHWEvent_JoySitck_Pressed );
+
+    xEventGroupClearBits( EGHandle_Software, kSWEvent_UI_Finished      |
+                                             kSWEvent_CTRL_Finished    );
+
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG, UI   ) , NULL, 256, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG, CTRL ) , NULL, 128, &SmartPi.serv_ID, 3, &SmartPi.cache_task_handle[1] ));
+    taskEXIT_CRITICAL();
+
+/*====================================================================
+ * Blocked  阻塞区
+=====================================================================*/
+    xEventGroupWaitBits( EGHandle_Software, kSWEvent_UI_Finished | kSWEvent_CTRL_Finished,
+                                   pdTRUE,          // 清除该位
+                                   pdTRUE,          // 等待所有指定的Bit
+                                   portMAX_DELAY ); // 永久等待
+
+/*====================================================================
+ * Clear  清除任务
+=====================================================================*/
+    taskENTER_CRITICAL();
+    SmartPi.deleteSubtask();
+    taskEXIT_CRITICAL();
+
+/*====================================================================
+ * Next  进入下一业务
+=====================================================================*/
+    if( SmartPi.serv_ID_tmp == 0 )
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(uint32_t)BLK_FUNC( Stack, pop )( SmartPi.serv_ID_Stack );
+    else{
+        BLK_FUNC( Stack, push )( SmartPi.serv_ID_Stack, (void*)(SmartPi.serv_ID) );
+        SmartPi.serv_ID = (typeof(SmartPi.serv_ID))(ROOT_Hardware_NRF24L01_RecvCFG_ + SmartPi.serv_ID_tmp);
+    }
+    
+    SmartPi.cache_task_num    = 0;
+    SmartPi.cache_task_handle = NULL;
+    break;
+}
+
+case ROOT_Hardware_NRF24L01_RecvCFG_Addr:{
 /*====================================================================
  * Init  初始化
 =====================================================================*/
@@ -375,27 +435,26 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
                                              kSWEvent_CTRL_Finished    );
     struct{
         uint8_t     Addr[5];
-        size_t      size;
+        uint8_t     size;
         int         bucket;
         const char* text;
     }param;
 
-    param.size = 5;
-    if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RXAddress ){
+    param.size = sizeof( param.Addr );
+    if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RecvCFG_Addr ){
         param.text = "RX Address:";
-        uint8_t len = 0;
-        const uint8_t* rxaddr = NRF24L01_getRXAddr( &len );
-        memcpy( param.Addr, rxaddr, len );
+        
+        RH_ASSERT( param.size == NRF24L01_getRXAddr( NRF24L01_PIPE_P0, param.Addr ) );
+
     }else{
         param.text = "TX Address:";
-        uint8_t len = 0;
-        const uint8_t* txaddr = NRF24L01_getTXAddr( &len );
-        memcpy( param.Addr, txaddr, len );
+       
+        RH_ASSERT( param.size == NRF24L01_getTXAddr( param.Addr) );
     }
     
     
-    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) , NULL, 256, &param, 3, &SmartPi.cache_task_handle[0] ));
-    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) , NULL, 128, &param, 3, &SmartPi.cache_task_handle[1] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG_Addr, UI   ) , NULL, 256, &param, 3, &SmartPi.cache_task_handle[0] ));
+    RH_ASSERT( pdPASS == xTaskCreate(  MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG_Addr, CTRL ) , NULL, 128, &param, 3, &SmartPi.cache_task_handle[1] ));
     taskEXIT_CRITICAL();
     
 /*====================================================================
@@ -405,12 +464,7 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
                                    pdTRUE,          // 清除该位
                                    pdTRUE,          // 等待所有指定的Bit
                                    portMAX_DELAY ); // 永久等待
-   
-    if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RXAddress ){
-        NRF24L01_setRXAddr( 0, param.Addr, sizeof(param.Addr) );
-    }else{
-        NRF24L01_setTXAddr( param.Addr, sizeof(param.Addr) );
-    }
+
 /*====================================================================
  * Clear  清除任务
 =====================================================================*/
@@ -424,12 +478,11 @@ case ROOT_Hardware_NRF24L01_TXAddress:{
 /*====================================================================
  * Process 数据处理
 =====================================================================*/
-    if( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RXAddress ){
-        NRF24L01_setRXAddr( 0, param.Addr, sizeof(param.Addr) );
-    }else if( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_TXAddress ){
-        NRF24L01_setTXAddr( param.Addr, sizeof(param.Addr) );
+    if( SmartPi.serv_ID==ROOT_Hardware_NRF24L01_RecvCFG_Addr ){
+        NRF24L01_setRXAddr( NRF24L01_PIPE_P0, param.Addr );
+    }else{
+        NRF24L01_setTXAddr( param.Addr );
     }
-    
 /*====================================================================
  * Next  进入下一业务
 =====================================================================*/

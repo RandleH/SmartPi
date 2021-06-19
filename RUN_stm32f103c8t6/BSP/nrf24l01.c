@@ -392,53 +392,68 @@ uint8_t NRF24L01_recv( uint8_t *buf, uint8_t len ){
 }
 
 #include <string.h>
-void NRF24L01_setTXAddr( uint8_t *addr, uint8_t len ){
-    NRF24L01_ASSERT( len <= 5 );
+void NRF24L01_setTXAddr( const uint8_t addr[5] ){
     NRF24L01_ASSERT( addr );
     CE(0);
-    __writeBuf( NRF24L01_WRITE_REG|TX_ADDR, addr, len ); 
+    __writeBuf( NRF24L01_WRITE_REG|TX_ADDR, addr, 5 ); 
     CE(1);
 }
 
-void NRF24L01_setRXAddr( uint8_t pipe, uint8_t *addr, uint8_t len ){
-    NRF24L01_ASSERT( len <= 5 );
+void NRF24L01_setRXAddr( E_NRF24L01_Pipe_t pipe, const uint8_t addr[5] ){
+
     NRF24L01_ASSERT( addr );
     NRF24L01_ASSERT( pipe <= NRF24L01_PIPE_P5 );
     
-    
     CE(0);
     switch( pipe ){
-        case NRF24L01_PIPE_P0: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P0, addr, len ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P0  , len   ); 
+        case NRF24L01_PIPE_P0: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P0, addr, 5 );
                                break;
-        case NRF24L01_PIPE_P1: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, addr, len ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P1  , len   ); 
+        case NRF24L01_PIPE_P1: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, addr, 5 );
                                break;
-        case NRF24L01_PIPE_P2: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P2, *addr ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P2  , 1     ); 
+        case NRF24L01_PIPE_P2: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, addr, 5 );
+                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P2, addr[4] ); 
                                break;
-        case NRF24L01_PIPE_P3: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P3, *addr ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P3  , 1     ); 
+        case NRF24L01_PIPE_P3: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, addr, 5 );
+                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P3, addr[4] );
                                break;
-        case NRF24L01_PIPE_P4: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P4, *addr ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P4  , 1     ); 
+        case NRF24L01_PIPE_P4: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, addr, 5 );
+                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P4, addr[4] );
                                break;
-        case NRF24L01_PIPE_P5: __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P5, *addr ); 
-                               __writeReg( NRF24L01_WRITE_REG|RX_PW_P5  , 1     ); 
+        case NRF24L01_PIPE_P5: __writeBuf( NRF24L01_WRITE_REG|RX_ADDR_P1, addr, 5 );
+                               __writeReg( NRF24L01_WRITE_REG|RX_ADDR_P5, addr[4] );
                                break;
     }                               
     CE(1);
 }
 
-static uint8_t __tx[5], __rx[5];
-const uint8_t* NRF24L01_getTXAddr(uint8_t* byteCnt){
-
-    return __tx;
+uint8_t NRF24L01_getTXAddr( uint8_t addr[5] ){
+    NRF24L01_ASSERT( addr );
+    __readBuf( NRF24L01_READ_REG|TX_ADDR, addr, 5 );
+    return 5;
 }
 
-const uint8_t* NRF24L01_getRXAddr(uint8_t* byteCnt){
+uint8_t NRF24L01_getRXAddr( E_NRF24L01_Pipe_t pipe, uint8_t addr[5] ){
+    NRF24L01_ASSERT( addr );
 
-    return __rx;
+    switch( pipe ){
+        case NRF24L01_PIPE_P0: __readBuf ( NRF24L01_READ_REG|RX_ADDR_P0, addr, 5 ); 
+                               break;
+        case NRF24L01_PIPE_P1: __readBuf ( NRF24L01_READ_REG|RX_ADDR_P1, addr, 5 ); 
+                               break;
+        case NRF24L01_PIPE_P2: __readBuf ( NRF24L01_READ_REG|RX_ADDR_P1, addr, 5 );
+                               addr[5-1] = __readReg ( NRF24L01_READ_REG|RX_ADDR_P2 );
+                               break;
+        case NRF24L01_PIPE_P3: __readBuf ( NRF24L01_READ_REG|RX_ADDR_P1, addr, 5 );
+                               addr[5-1] = __readReg ( NRF24L01_READ_REG|RX_ADDR_P3 );
+                               break;
+        case NRF24L01_PIPE_P4: __readBuf ( NRF24L01_READ_REG|RX_ADDR_P1, addr, 5 );
+                               addr[5-1] = __readReg ( NRF24L01_READ_REG|RX_ADDR_P4 );
+                               break;
+        case NRF24L01_PIPE_P5: __readBuf ( NRF24L01_READ_REG|RX_ADDR_P1, addr, 5 );
+                               addr[5-1] = __readReg ( NRF24L01_READ_REG|RX_ADDR_P5 );
+                               break;
+    }
+    return 5;
 }
 
 void NRF24L01_autoACK( bool cmd ){

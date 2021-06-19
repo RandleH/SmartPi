@@ -264,11 +264,6 @@ struct S_NRF24L01_CFG_t{
 typedef struct S_NRF24L01_CFG_t  S_NRF24L01_CFG_t;
 typedef struct S_NRF24L01_CFG_t* P_NRF24L01_CFG_t;
 
-/*==========================================
- * NRF24L01全局配置参数
-==========================================*/
-
-
 
 /*========================================================
  * NRF24L01 模式设定
@@ -279,30 +274,67 @@ typedef struct S_NRF24L01_CFG_t* P_NRF24L01_CFG_t;
  * tx    --- 发送模式
  * rx    --- 接收模式
  * pd    --- 掉电模式
+
+ * 特别注意:
+
+ * 任何的收发配置不一致 都将导致传输失败. 建议使用结构体批量化配置.
+ * NRF24L01 共有6个接收通道, P0/P1 分别占5字节, P[2:5]共享P1的
+   前4字节. 更改P1通道地址将会影响P[2:5]. 同样, 更改任意P[2:5]地
+   址将会影响P1.
+ * 自动响应AutoAcknowledge开启后, 接收端ACK信号自动发送至发送端
+   的P0接收通道. 因此如果开启, 则P0地址将会被同步成TX地址.
+ * 自动响应AutoAcknowledge开启后, 接收端也应当开启, 否则发送端
+   收不到ACK, 误认为发送失败.
+ * 强制开启IRQ, 即本驱动永久开启中断电平信号.  
+ * 使用结构体进行配置, 将会覆盖之前的模块配置. 如需保存, 建议先使用
+   NRF24L01_rdCfg函数 将之前的配置导出, 再应用新配置.
+ * 涉及可移植性, 不提供延时函数API, 以下函数执行后需延时2ms:
+   > NRF24L01_tx
+   > NRF24L01_rx
+   > NRF24L01_pd
+   > NRF24L01_setTXAddr
+   > NRF24L01_setRXAddr
+   > NRF24L01_setFreq
+ 
+ * 默认的配置结构体:
+   .autoACK = true  ,\
+   .crc     = true  ,\
+   .gainLNA = true  ,\
+   .lockPLL = false ,\
+   .pipe    = NRF24L01_PIPE_P0      ,\
+   .rate    = NRF24L01_RATE_2Mbps   ,\
+   .freq    = NRF24L01_FREQ_2440MHz ,\
+   .crco    = NRF24L01_CRCO_2Byte   ,\
+   .pwr     = NRF24L01_PWR_0dBm     ,\
+   .addr.tx     = { 0xff, 0xff, 0xff, 0xff, 0x7f } ,\
+   .addr.rx_p0  = { 0xff, 0xff, 0xff, 0xff, 0x7f } ,\
+   .addr.rx_p1  = { 0xff, 0xff, 0xff, 0xff, 0x8f } ,\
+   .data.buf = cache  ,\
+   .data.len = sizeof(cache)  \
+
 =========================================================*/
 void      NRF24L01_init       ( void );
 bool      NRF24L01_exist      ( void );
 bool      NRF24L01_hasMessage ( void );
-void      NRF24L01_tx         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成发送模式 //
+void      NRF24L01_tx         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成发送模式 
 void      NRF24L01_rx         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成接收模式
-void      NRF24L01_pd         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成掉电模式 //
+void      NRF24L01_pd         ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块并设置成掉电模式 
 void      NRF24L01_rdCfg      (       S_NRF24L01_CFG_t  *p ); //  NULL: 不允许     ; ptr: 目标写入     ; 从模块读取当前配置 
 void      NRF24L01_wtCfg      ( const S_NRF24L01_CFG_t  *p ); //  NULL: 使用默认配置; ptr: 使用自定义配置; 将配置写入模块 
 
 /*========================================================
  * NRF24L01 配置参数设定
 ==========================================================
- * 以下函数将写入至 全局结构体 G_NRF24L01_Config 
  * 以下函数将更改模块参数
 =========================================================*/
 void               NRF24L01_autoACK    ( bool cmd );
 void               NRF24L01_enCRC      ( bool cmd );
 
-void               NRF24L01_setTXAddr  (                uint8_t *addr, uint8_t len );//
-void               NRF24L01_setRXAddr  ( uint8_t  pipe, uint8_t *addr, uint8_t len );//
+void               NRF24L01_setTXAddr  (                         const uint8_t addr[5] );
+void               NRF24L01_setRXAddr  ( E_NRF24L01_Pipe_t pipe, const uint8_t addr[5] );
 
-const uint8_t*     NRF24L01_getTXAddr  ( uint8_t *byteCnt);
-const uint8_t*     NRF24L01_getRXAddr  ( uint8_t *byteCnt);
+uint8_t            NRF24L01_getTXAddr  (                         uint8_t addr[5] );
+uint8_t            NRF24L01_getRXAddr  ( E_NRF24L01_Pipe_t pipe, uint8_t addr[5] );
 
 
 E_NRF24L01_Freq_t  NRF24L01_getFreq    ( void );
@@ -312,7 +344,6 @@ void               NRF24L01_setFreq    ( E_NRF24L01_Freq_t freq );
 /*========================================================
  * NRF24L01 收发函数 
 ==========================================================
- * 以下函数将按照 全局结构体 G_NRF24L01_Config 的配置进行传输
  * 返回参数为状态寄存器STATUS值
 =========================================================*/
 uint8_t   NRF24L01_send   ( uint8_t *data, uint8_t len );//

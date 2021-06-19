@@ -454,12 +454,10 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, UI   ) ( void* param ){
         cfg.text_color  = M_COLOR_WHITE;
 
         __GUI_MenuParam_t* m = alloca( SmartPi.numOfNextNodes*sizeof(__GUI_MenuParam_t) );
-        m[0].text = "RX mode";
-        m[1].text = "RX address";
-        m[2].text = "TX mode";
-        m[3].text = "TX address";
-        m[4].text = "ACK";
-        m[5].text = "RF channel";
+        m[0].text = "RX Config";
+        m[1].text = "TX Config";
+        m[2].text = "ACK";
+        m[3].text = "Frequency";
 
         cfg.menuList = m;
     
@@ -567,10 +565,146 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01, CTRL ) ( void* param ){
 
 
 
-
-void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG, UI   ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( SmartPi.serv_ID == 0x00000112 || SmartPi.serv_ID == 0x00000114 );
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RecvCFG );
+#endif
+
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+    ID_t ID_Menu = 0;
+    {
+        __GUI_Menu_t cfg = {0};
+        cfg.area.xs = 0;
+        cfg.area.ys = 0;
+        cfg.area.height = RH_CFG_SCREEN_HEIGHT -1;
+        cfg.area.width  = RH_CFG_SCREEN_WIDTH  -1;
+        cfg.nItem = SmartPi.numOfNextNodes;
+        cfg.title = "RX Config";
+        cfg.color_title = M_COLOR_WHITE;
+        cfg.size  = 10;
+        
+        cfg.bk_color    = M_COLOR_BLACK;
+        cfg.sl_color    = M_COLOR_WHITE;
+        cfg.text_color  = M_COLOR_WHITE;
+
+        __GUI_MenuParam_t* m = alloca( SmartPi.numOfNextNodes*sizeof(__GUI_MenuParam_t) );
+        m[0].text = "Pipe";
+        m[1].text = "Address";
+
+        cfg.menuList = m;
+    
+        ID_Menu = GLU_FUNC( Menu, create )(&cfg);
+    }
+    GLU_FUNC( Menu, frame )  ( ID_Menu, 0 );
+    GLU_FUNC( Menu, insert ) ( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
+    EventBits_t xResult;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT == false ){
+        xResult = xEventGroupWaitBits( EGHandle_Hardware, kHWEvent_JoySitck_Up|kHWEvent_JoySitck_Down|kHWEvent_JoySitck_Pressed|kHWEvent_JoySitck_Left,
+                                       pdFALSE,         // 清除该位
+                                       pdFALSE,         // 不等待所有指定的Bit, 即逻辑或
+                                       portMAX_DELAY ); // 永久等待
+        if( (xResult&kHWEvent_JoySitck_Left) || (xResult&kHWEvent_JoySitck_Pressed) ){
+            EXIT = true;
+        }
+
+
+        int ans = 0;
+        if     ( xResult&kHWEvent_JoySitck_Up   )  { ans = -1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up   ); }
+        else if( xResult&kHWEvent_JoySitck_Down )  { ans =  1; xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Down ); }
+        else                                       ans =  0;
+        
+        taskENTER_CRITICAL();
+        GLU_FUNC( Menu, scroll )( ID_Menu, ans );
+        GLU_FUNC( GUI, refreashEntireScreen )();
+        taskEXIT_CRITICAL();
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    GLU_FUNC( Menu, delete )( ID_Menu );
+    GLU_FUNC( GUI, refreashEntireScreen )();
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
+    //...//
+
+    while(1);
+}
+
+
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG, CTRL ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RecvCFG );
+#endif
+
+/*====================================================================
+ * Init  子任务参数初始化
+=====================================================================*/
+    bool EXIT = false;
+
+/*====================================================================
+ * Loop  子任务循环体
+=====================================================================*/
+    while( EXIT==false ){
+        EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
+
+        if( joystick_data[1] > 4000 ){
+            if( SmartPi.serv_ID_tmp > 1 )
+                SmartPi.serv_ID_tmp--;
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+        }else if( joystick_data[1] < 100 ){
+            if( SmartPi.serv_ID_tmp < SmartPi.numOfNextNodes )
+                SmartPi.serv_ID_tmp++;
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
+        }
+
+        if( joystick_data[0] > 4000 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+        }else if( joystick_data[0] < 100 ){
+            xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Left  );
+        }
+        
+        if( xResult&kHWEvent_JoySitck_Pressed ){
+            EXIT = true;
+        }
+        
+        if( xResult&kHWEvent_JoySitck_Left ){
+            SmartPi.serv_ID_tmp = 0;
+            EXIT = true;
+        }
+        vTaskDelay(10);
+    }
+
+/*====================================================================
+ * Exit  子任务退出工作
+=====================================================================*/
+    xEventGroupSetBits( EGHandle_Software, kSWEvent_CTRL_Finished );
+    while(1);    
+}
+
+
+
+
+
+
+
+
+
+
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG_Addr, UI   ) ( void* param ){
+#ifdef RH_DEBUG
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RecvCFG_Addr || SmartPi.serv_ID == 0x00000114 );
 #endif
     
 /*====================================================================
@@ -578,53 +712,59 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
 =====================================================================*/
     bool EXIT = false;
     struct{
-        uint8_t Addr[5];
-        size_t  size;
-        int     bucket;
+        uint8_t     Addr[5];
+        uint8_t     size;
+        int         bucket;
         const char* text;
     }*p = param;
     ID_t ID_Text       = 0;
     ID_t ID_Addr[5]    = {0};
+
+    __GUI_ObjDataScr_spinbox UI_data = {
+        .min         = 0   ,
+        .max         = 255 ,
+        .value       = p->Addr[0],
+        .text_offset = 23,
+        .margin      = 2 ,
+        .active      = true
+    };
     
     {
         __GUI_Object_t cfg = {0};
         
-        cfg.widget      = kGUI_ObjStyle_num;
-        cfg.area.width  = 23;
-        cfg.area.height = 12;
-        cfg.area.xs     = (int)((RH_CFG_SCREEN_WIDTH - 5*cfg.area.width)>>1);
-        cfg.area.ys     = 32;
+        cfg.widget     = kGUI_ObjStyle_spinbox;
+        cfg.obj_color  = M_COLOR_WHITE;
+        cfg.area.width = UI_data.text_offset;   // 不显示文字, 因此文字偏移量等于该物件宽度
+        cfg.area.height= 30;
+        cfg.area.xs    = (int)((RH_CFG_SCREEN_WIDTH - 5*cfg.area.width)>>1);
+        cfg.area.ys    = 20;
         
-        cfg.bk_color    = M_COLOR_BLACK;
-        cfg.font        = kGUI_FontStyle_ArialRounded_Bold;
-        cfg.text_align  = kGUI_FontAlign_Middle;
-        cfg.obj_color   = M_COLOR_WHITE;
-        cfg.text_size   = 8;
-        // cfg.max[0]      = 255;
-        // cfg.min[0]      = 0;
-        // cfg.val[0]      = p->Addr[0];
-        cfg.showFrame   = true;
-        ID_Addr[0] = GLU_FUNC( Object, create )( &cfg, NULL );
+        cfg.text       = NULL;
+        cfg.text_size  = 8;
+        cfg.obj_color  = M_COLOR_WHITE;
         
-        cfg.showFrame  = false;
-        cfg.area.xs   += cfg.area.width;
-        // cfg.val[0]     = p->Addr[1];
-        ID_Addr[1] = GLU_FUNC( Object, create )( &cfg, NULL );
         
-        cfg.area.xs   += cfg.area.width;
-        // cfg.val[0]     = p->Addr[2];
-        ID_Addr[2] = GLU_FUNC( Object, create )( &cfg, NULL );
-        
-        cfg.area.xs   += cfg.area.width;
-        // cfg.val[0]     = p->Addr[3];
-        ID_Addr[3] = GLU_FUNC( Object, create )( &cfg, NULL );
-        
-        cfg.area.xs   += cfg.area.width;
-        // cfg.val[0]     = p->Addr[4];
-        ID_Addr[4] = GLU_FUNC( Object, create )( &cfg, NULL );
+
+        ID_Addr[0] = GLU_FUNC( Object, create )( &cfg, &UI_data );
+        cfg.area.xs += cfg.area.width;
+        UI_data.active  = false;
+        UI_data.value   = p->Addr[1],
+        ID_Addr[1] = GLU_FUNC( Object, create )( &cfg, &UI_data );
+
+        UI_data.value   = p->Addr[2],
+        cfg.area.xs += cfg.area.width;
+        ID_Addr[2] = GLU_FUNC( Object, create )( &cfg, &UI_data );
+
+        UI_data.value   = p->Addr[3],
+        cfg.area.xs += cfg.area.width;
+        ID_Addr[3] = GLU_FUNC( Object, create )( &cfg, &UI_data );
+
+        UI_data.value   = p->Addr[4],
+        cfg.area.xs += cfg.area.width;
+        ID_Addr[4] = GLU_FUNC( Object, create )( &cfg, &UI_data );
         
         cfg.widget      = kGUI_ObjStyle_text;
-        cfg.area.ys   -= cfg.area.height;
+        cfg.area.ys    = 0;
         cfg.area.xs    = 0;
         cfg.text       = p->text;
         cfg.area.width = strlen(cfg.text)*8;
@@ -633,26 +773,13 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
         cfg.text_size   = 8;
         ID_Text         = GLU_FUNC( Object, create )( &cfg, NULL );
     }
-    
+    GLU_FUNC( GUI, autoDisplay ) ( true );
     GLU_FUNC( Object, insert )( ID_Text    );
     GLU_FUNC( Object, insert )( ID_Addr[0] );
     GLU_FUNC( Object, insert )( ID_Addr[1] );
     GLU_FUNC( Object, insert )( ID_Addr[2] );
     GLU_FUNC( Object, insert )( ID_Addr[3] );
     GLU_FUNC( Object, insert )( ID_Addr[4] );
-
-    __GUI_ObjDataScr_num data = {0};
-
-    data.value = p->Addr[0];
-    GLU_FUNC( Object, adjust )( ID_Addr[0], &data, sizeof(data) );
-    data.value = p->Addr[1];
-    GLU_FUNC( Object, adjust )( ID_Addr[1], &data, sizeof(data) );
-    data.value = p->Addr[2];
-    GLU_FUNC( Object, adjust )( ID_Addr[2], &data, sizeof(data) );
-    data.value = p->Addr[3];
-    GLU_FUNC( Object, adjust )( ID_Addr[3], &data, sizeof(data) );
-    data.value = p->Addr[4];
-    GLU_FUNC( Object, adjust )( ID_Addr[4], &data, sizeof(data) );
 
     GLU_FUNC( GUI, refreashEntireScreen )();
     EventBits_t xResult;
@@ -667,27 +794,23 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
                                        portMAX_DELAY ); // 永久等待
         if( xResult&kHWEvent_JoySitck_Pressed ){
             EXIT = true;
-        }
-
-        if( xResult&kHWEvent_JoySitck_Left ){
-            GLU_FUNC( Object, frame )( ID_Addr[p->bucket+1], false );
-            GLU_FUNC( Object, frame )( ID_Addr[p->bucket  ], true  );
-            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left   );
-        }else if( xResult&kHWEvent_JoySitck_Right ){
-            GLU_FUNC( Object, frame )( ID_Addr[p->bucket  ], true  );
-            GLU_FUNC( Object, frame )( ID_Addr[p->bucket-1], false );
-            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Right );
-        }
-        
-        if( (xResult&kHWEvent_JoySitck_Up) || (xResult&kHWEvent_JoySitck_Down) ){
+        }else{
             for( int i=0; i<p->size; i++ ){
-                __GUI_ObjDataScr_num data = { .value = p->Addr[i] };
-                GLU_FUNC( Object, adjust )( ID_Addr[i], &data, sizeof(data) );
+                if( i==p->bucket )
+                    UI_data.active = true;
+                else
+                    UI_data.active = false;
+
+                UI_data.value = p->Addr[i];
+
+                GLU_FUNC( Object, adjust )( ID_Addr[i], &UI_data, sizeof(UI_data) );
             }
 
             xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Up   );
             xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Down );
-        }
+            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Right );
+            xEventGroupClearBits( EGHandle_Hardware, kHWEvent_JoySitck_Left );
+        } 
 
         
         taskENTER_CRITICAL();
@@ -698,20 +821,22 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, UI   ) ( void* param 
 /*====================================================================
  * Exit  子任务退出工作
 =====================================================================*/
+    GLU_FUNC( Object, delete )( ID_Text ); 
     GLU_FUNC( Object, delete )( ID_Addr[0] );
     GLU_FUNC( Object, delete )( ID_Addr[1] );
     GLU_FUNC( Object, delete )( ID_Addr[2] );
     GLU_FUNC( Object, delete )( ID_Addr[3] );
     GLU_FUNC( Object, delete )( ID_Addr[4] );
     GLU_FUNC( GUI, refreashEntireScreen )();
+    GLU_FUNC( GUI, autoDisplay ) ( false );
     xEventGroupSetBits( EGHandle_Software, kSWEvent_UI_Finished );
     //...//
 
     while(1);
 }
-void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param ){
+void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RecvCFG_Addr, CTRL ) ( void* param ){
 #ifdef RH_DEBUG
-    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RXAddress || SmartPi.serv_ID == ROOT_Hardware_NRF24L01_TXAddress );
+    RH_ASSERT( SmartPi.serv_ID == ROOT_Hardware_NRF24L01_RecvCFG_Addr || SmartPi.serv_ID == ROOT_Hardware_NRF24L01_TXAddress );
 #endif
 
 /*====================================================================
@@ -719,9 +844,9 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param 
 =====================================================================*/
     bool EXIT = false;
     struct{
-        uint8_t Addr[5];
-        size_t  size;
-        int     bucket;
+        uint8_t     Addr[5];
+        uint8_t     size;
+        int         bucket;
         const char* text;
     }*p = param;
     
@@ -740,7 +865,8 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param 
         taskENTER_CRITICAL();
         EventBits_t xResult = xEventGroupGetBitsFromISR( EGHandle_Hardware );
         if( joystick_data[1] > 4000 /* && p->RX_Addr[ p->bucket ]<0xff */ ){
-            p->Addr[ p->bucket ]++;
+            if( p->Addr[ p->bucket ] > 0 )
+                p->Addr[ p->bucket ]--;
             xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
             xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
             
@@ -753,7 +879,8 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RXAddress, CTRL ) ( void* param 
             }
             operation_record |= (0x0001);
         }else if( joystick_data[1] < 100 /* && p->RX_Addr[ p->bucket ]>0x00*/  ){
-            p->Addr[ p->bucket ]--;
+            if( p->Addr[ p->bucket ] < 0xff )
+                p->Addr[ p->bucket ]++;
             xEventGroupClearBits ( EGHandle_Hardware, kHWEvent_JoySitck_Up    );
             xEventGroupSetBits   ( EGHandle_Hardware, kHWEvent_JoySitck_Down  );
             
@@ -835,9 +962,9 @@ void MAKE_TASK( subtask, ROOT_Hardware_NRF24L01_RFCH, UI   ) ( void* param ){
     cfg.widget     = kGUI_ObjStyle_spinbox;
     cfg.obj_color  = M_COLOR_WHITE;
     cfg.area.width = 60;
-    cfg.area.height= 40;
+    cfg.area.height= 30;
     cfg.area.xs    = 34;
-    cfg.area.ys    = 11;
+    cfg.area.ys    = 20;
     cfg.text       = "MHz";
     cfg.text_size  = 8;
     cfg.obj_color  = M_COLOR_WHITE;

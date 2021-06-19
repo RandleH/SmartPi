@@ -23,14 +23,16 @@ typedef enum{
     ROOT_Hardware_LED                 , //  ///
     ROOT_Hardware_Bluetooth           , //  ///
     ROOT_Hardware_Beeper              , //  ///
-
+    
     ROOT_Hardware_NRF24L01_           , //  ----
-    ROOT_Hardware_NRF24L01_RXMode     , //  ////
-    ROOT_Hardware_NRF24L01_RXAddress  , //  ////
-    ROOT_Hardware_NRF24L01_TXMode     , //  ////
-    ROOT_Hardware_NRF24L01_TXAddress  , //  ////
+    ROOT_Hardware_NRF24L01_RecvCFG    , //  ////
+    ROOT_Hardware_NRF24L01_TranCFG    , //  ////
     ROOT_Hardware_NRF24L01_ACK        , //  ////
     ROOT_Hardware_NRF24L01_RFCH       , //  ////
+
+    ROOT_Hardware_NRF24L01_RecvCFG_     , //  -----
+    ROOT_Hardware_NRF24L01_RecvCFG_Pipe , //  /////
+    ROOT_Hardware_NRF24L01_RecvCFG_Addr , //  /////
     
     ROOT_Game_                        , //  ---
     ROOT_Game_Manila                  , //  ///
